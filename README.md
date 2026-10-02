@@ -34,7 +34,7 @@ The home page's **Download the uBeer mobile app** button opens the platform inst
 
 The floating uBeer Support chat appears throughout the customer, driver and admin pages. It uses the locally running Ollama model `ghunghab/qwen2.5-1.5b:q4km` through `POST /api/support/chat`, answers in the selected app language, and receives current active-region and in-stock catalog facts from PostgreSQL. It is rate-limited to 12 messages per IP per minute. The prompt covers address validation, delivery coverage, product pricing, crypto checkout, order tracking, driver onboarding, app installation, and account-safety boundaries. It does not access customer orders or take actions on behalf of the user.
 
-The API connects only to a loopback Ollama URL. Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in `.env` to override their defaults; chat messages are sent to this local model service and are not written to the uBeer database. Users are told not to share passwords, verification or delivery codes, payment details, or identity documents in the chat.
+The API connects only to a loopback Ollama URL. Set `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, or `OLLAMA_NUM_THREAD` in `.env` to override their defaults; this server uses eight inference threads and limits each answer to 96 generated tokens. Chat messages are sent to this local model service and are not written to the uBeer database. Users are told not to share passwords, verification or delivery codes, payment details, or identity documents in the chat.
 
 Region geometry is stored as GeoJSON JSONB. The API performs authoritative polygon, multipolygon and circle checks for customer lookups, checkout and driver assignment. Leaflet and OpenStreetMap render the admin region map; Leaflet Draw creates polygon boundaries.
 
@@ -100,6 +100,7 @@ PostgreSQL is expected to run on the host. Redis is the only container in the co
 | `BTCPAY_WEBHOOK_SECRET` | Secret used to verify webhook HMAC signatures. |
 | `OLLAMA_BASE_URL` | Loopback address for local Ollama; defaults to `http://127.0.0.1:11434`. |
 | `OLLAMA_MODEL` | Local Ollama model; defaults to `ghunghab/qwen2.5-1.5b:q4km`. |
+| `OLLAMA_NUM_THREAD` | CPU threads used per chat request; defaults to `8` and is capped at `12`. |
 | `SMTP_URL` | Reserved for the SMTP mail transport adapter. |
 
 ## BTCPay Setup

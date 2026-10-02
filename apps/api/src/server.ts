@@ -130,6 +130,10 @@ const supportChatSchema = z.object({
 const supportLocaleNames: Record<SupportedLocale, string> = {
   en: "English", fr: "French", it: "Italian", es: "Spanish", zh: "Simplified Chinese", ru: "Russian",
 };
+const configuredOllamaThreads = Number.parseInt(process.env.OLLAMA_NUM_THREAD ?? "8", 10);
+const ollamaNumThread = Number.isInteger(configuredOllamaThreads) && configuredOllamaThreads > 0
+  ? Math.min(configuredOllamaThreads, 12)
+  : 8;
 
 async function currentSupportPlatformContext(): Promise<string> {
   try {
@@ -225,7 +229,7 @@ ${await currentSupportPlatformContext()}`;
         messages: [{ role: "system", content: systemPrompt }, ...messages],
         stream: false,
         keep_alive: "10m",
-        options: { temperature: 0.3, num_ctx: 8192, num_predict: 120 },
+        options: { temperature: 0.3, num_ctx: 8192, num_predict: 96, num_thread: ollamaNumThread },
       }),
       signal: AbortSignal.timeout(50_000),
     });
