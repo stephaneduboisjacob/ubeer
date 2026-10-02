@@ -124,7 +124,7 @@ app.get("/api/locale", async (request) => {
 
 const supportChatSchema = z.object({
   locale: z.enum(supportedLocales).default("en"),
-  messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(1500) })).min(1).max(12),
+  messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(1000) })).min(1).max(12),
 }).strict();
 
 const supportLocaleNames: Record<SupportedLocale, string> = {
@@ -172,8 +172,8 @@ async function currentSupportPlatformContext(): Promise<string> {
 
 app.post("/api/support/chat", { config: { rateLimit: { max: 12, timeWindow: "1 minute" } } }, async (request, reply) => {
   const parsed = supportChatSchema.safeParse(request.body);
-  if (!parsed.success) return reply.code(400).send({ error: "Please send a message of up to 1,500 characters." });
-  const messages = parsed.data.messages.slice(-10);
+  if (!parsed.success) return reply.code(400).send({ error: "Please send a message of up to 1,000 characters." });
+  const messages = parsed.data.messages.slice(-6);
   if (messages.at(-1)?.role !== "user") return reply.code(400).send({ error: "Please send a new question to continue." });
 
   const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
@@ -224,7 +224,7 @@ ${await currentSupportPlatformContext()}`;
         messages: [{ role: "system", content: systemPrompt }, ...messages],
         stream: false,
         keep_alive: "10m",
-        options: { temperature: 0.3, num_ctx: 4096, num_predict: 320 },
+        options: { temperature: 0.3, num_ctx: 8192, num_predict: 320 },
       }),
       signal: AbortSignal.timeout(50_000),
     });

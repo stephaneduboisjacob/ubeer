@@ -20,7 +20,7 @@ export default function SupportChat() {
   async function sendMessage(value = draft) {
     const content = value.trim();
     if (!content || pending) return;
-    const conversation = [...messages, { role: "user" as const, content }].slice(-10);
+    const conversation = [...messages, { role: "user" as const, content }].slice(-6);
     setMessages(conversation);
     setDraft("");
     setPending(true);
@@ -74,7 +74,7 @@ export default function SupportChat() {
         {pending && <div className="support-message assistant"><span className="support-message-avatar" aria-hidden="true">u</span><div className="support-typing" aria-label={t("Thinking…")}><i/><i/><i/></div></div>}
       </div>
       <form className="support-compose" onSubmit={submit}>
-        <textarea rows={1} maxLength={1500} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleKeyDown} placeholder={t("Message uBeer Support…")} aria-label={t("Message uBeer Support…")} disabled={pending}/>
+        <textarea rows={1} maxLength={1000} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleKeyDown} placeholder={t("Message uBeer Support…")} aria-label={t("Message uBeer Support…")} disabled={pending}/>
         <button type="submit" disabled={pending || !draft.trim()} aria-label={t("Send message")}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-5 16-3-7-8-1Z"/><path d="m12 13 8-9"/></svg></button>
       </form>
       <p className="support-privacy"><span aria-hidden="true">✦</span>{t("Local AI · Don’t share passwords, verification or delivery codes, payment details, or ID documents.")}</p>
