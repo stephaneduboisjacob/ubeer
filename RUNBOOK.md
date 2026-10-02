@@ -8,10 +8,15 @@ The production API unit is `ubeer-api.service`; Nginx serves the PWA and proxies
 sudo systemctl restart ubeer-api
 sudo systemctl status ubeer-api
 sudo journalctl -u ubeer-api -f
+sudo systemctl status ollama
+ollama list
+sudo journalctl -u ollama -f
 cd /opt/ubeer && sudo docker compose ps
 sudo nginx -t
 sudo systemctl reload nginx
 ```
+
+Ollama must remain bound to loopback port `11434`; do not expose it publicly. The support API defaults to `ghunghab/qwen2.5-1.5b:q4km`. If the support widget reports that the assistant is unavailable, confirm Ollama and the model are present and running, then inspect the API and Ollama journals above.
 
 For a code update, install from the committed lockfile, build both workspaces, apply migrations, publish the new static bundle and restart the API:
 

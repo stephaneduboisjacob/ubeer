@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, Route, Routes, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CryptoAcceptanceBanner, LanguagePicker, LocalizationProvider, t, useLocalization } from "./localization";
+import SupportChat from "./SupportChat";
 import L, { type LeafletEvent, type Layer } from "leaflet";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet-draw";
@@ -449,5 +450,5 @@ function adminTabLabel(tab: string): string {
 function NotFound() { useLocalization(); return <main className="subpage narrow-page"><div className="eyebrow">{t("404 · OFF THE MAP")}</div><h1>{t("Wrong turn.")}<br/><span>{t("Let’s head home.")}</span></h1><Link className="button-dark" to="/">{t("Back to uBeer")}</Link></main>; }
 
 export default function App() {
-  return <LocalizationProvider><SiteHeader/><CryptoAcceptanceBanner/><Routes><Route path="/" element={<HomePage/>}/><Route path="/driver" element={<DriverPage/>}/><Route path="/admin" element={<AdminPage/>}/><Route path="/account" element={<AccountPage/>}/><Route path="/orders/:id/status" element={<OrderStatusPage/>}/><Route path="*" element={<NotFound/>}/></Routes></LocalizationProvider>;
+  return <LocalizationProvider><SiteHeader/><CryptoAcceptanceBanner/><Routes><Route path="/" element={<HomePage/>}/><Route path="/driver" element={<DriverPage/>}/><Route path="/admin" element={<AdminPage/>}/><Route path="/account" element={<AccountPage/>}/><Route path="/orders/:id/status" element={<OrderStatusPage/>}/><Route path="*" element={<NotFound/>}/></Routes><SupportChat/></LocalizationProvider>;
 }

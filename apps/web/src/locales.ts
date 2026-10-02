@@ -3089,5 +3089,117 @@ export const translations: Record<string, Partial<Record<Locale, string>>> = {
     "es": "Actualización de pago no válida",
     "zh": "支付更新无效",
     "ru": "Неверное обновление выплаты."
+  },
+  "Open uBeer AI support chat": {
+    "fr": "Ouvrir le clavardage de soutien IA uBeer",
+    "it": "Apri la chat di assistenza IA uBeer",
+    "es": "Abrir el chat de soporte con IA de uBeer",
+    "zh": "打开 uBeer AI 客服聊天",
+    "ru": "Открыть чат поддержки uBeer с ИИ"
+  },
+  "Close support chat": {
+    "fr": "Fermer le clavardage de soutien",
+    "it": "Chiudi la chat di assistenza",
+    "es": "Cerrar el chat de soporte",
+    "zh": "关闭客服聊天",
+    "ru": "Закрыть чат поддержки"
+  },
+  "uBeer Support": {
+    "fr": "Soutien uBeer",
+    "it": "Assistenza uBeer",
+    "es": "Soporte de uBeer",
+    "zh": "uBeer 客服",
+    "ru": "Поддержка uBeer"
+  },
+  "AI support · powered locally": {
+    "fr": "Soutien IA · exécuté localement",
+    "it": "Assistenza IA · eseguita in locale",
+    "es": "Soporte de IA · ejecutado localmente",
+    "zh": "AI 客服 · 本地运行",
+    "ru": "Поддержка ИИ · работает локально"
+  },
+  "Start a new chat": {
+    "fr": "Commencer un nouveau clavardage",
+    "it": "Inizia una nuova chat",
+    "es": "Iniciar un nuevo chat",
+    "zh": "开始新聊天",
+    "ru": "Начать новый чат"
+  },
+  "A LITTLE HELP, RIGHT HERE": {
+    "fr": "UN PETIT COUP DE MAIN, JUSTE ICI",
+    "it": "UN PICCOLO AIUTO, PROPRIO QUI",
+    "es": "UN POCO DE AYUDA, JUSTO AQUÍ",
+    "zh": "就在这里，为您提供帮助",
+    "ru": "ПОМОЩЬ РЯДОМ, ПРЯМО ЗДЕСЬ"
+  },
+  "Hi! I’m uBeer’s AI support assistant. Ask me about delivery areas, orders, payments, drivers, or installing the app.": {
+    "fr": "Bonjour! Je suis l'assistant IA de soutien uBeer. Posez-moi vos questions sur les zones de livraison, les commandes, les paiements, les chauffeurs ou l'installation de l'application.",
+    "it": "Ciao! Sono l'assistente IA di uBeer. Chiedimi informazioni sulle zone di consegna, gli ordini, i pagamenti, i corrieri o l'installazione dell'app.",
+    "es": "¡Hola! Soy el asistente de soporte con IA de uBeer. Pregúntame sobre zonas de entrega, pedidos, pagos, repartidores o cómo instalar la aplicación.",
+    "zh": "你好！我是 uBeer 的 AI 客服助手。您可以问我配送区域、订单、付款、配送员或如何安装应用。",
+    "ru": "Привет! Я ИИ-помощник uBeer. Спрашивайте о зонах доставки, заказах, оплате, водителях или установке приложения."
+  },
+  "Where do you deliver?": {
+    "fr": "Où livrez-vous?",
+    "it": "Dove effettuate le consegne?",
+    "es": "¿Dónde hacen entregas?",
+    "zh": "你们配送到哪里？",
+    "ru": "Куда вы доставляете?"
+  },
+  "How do I place an order?": {
+    "fr": "Comment passer une commande?",
+    "it": "Come faccio a effettuare un ordine?",
+    "es": "¿Cómo hago un pedido?",
+    "zh": "如何下单？",
+    "ru": "Как оформить заказ?"
+  },
+  "How do I install the app?": {
+    "fr": "Comment installer l'application?",
+    "it": "Come installo l'app?",
+    "es": "¿Cómo instalo la aplicación?",
+    "zh": "如何安装应用？",
+    "ru": "Как установить приложение?"
+  },
+  "Message uBeer Support…": {
+    "fr": "Écrivez au soutien uBeer…",
+    "it": "Scrivi all'assistenza uBeer…",
+    "es": "Escribe al soporte de uBeer…",
+    "zh": "给 uBeer 客服留言…",
+    "ru": "Напишите в поддержку uBeer…"
+  },
+  "Send message": {
+    "fr": "Envoyer le message",
+    "it": "Invia messaggio",
+    "es": "Enviar mensaje",
+    "zh": "发送消息",
+    "ru": "Отправить сообщение"
+  },
+  "Thinking…": {
+    "fr": "Réflexion…",
+    "it": "Sto pensando…",
+    "es": "Pensando…",
+    "zh": "正在思考…",
+    "ru": "Думаю…"
+  },
+  "I couldn't reach our support assistant just now. Please try again in a moment.": {
+    "fr": "Je n'arrive pas à joindre notre assistant de soutien. Veuillez réessayer dans un instant.",
+    "it": "Non riesco a contattare l'assistente di supporto. Riprova tra un momento.",
+    "es": "No pude conectar con el asistente de soporte. Inténtalo de nuevo en un momento.",
+    "zh": "暂时无法连接客服助手，请稍后重试。",
+    "ru": "Не удалось связаться с помощником поддержки. Попробуйте ещё раз через минуту."
+  },
+  "Local AI · Don’t share passwords, verification or delivery codes, payment details, or ID documents.": {
+    "fr": "IA locale · Ne partagez pas vos mots de passe, codes de vérification ou de livraison, données de paiement ou pièces d'identité.",
+    "it": "IA locale · Non condividere password, codici di verifica o consegna, dati di pagamento o documenti d'identità.",
+    "es": "IA local · No compartas contraseñas, códigos de verificación o entrega, datos de pago ni documentos de identidad.",
+    "zh": "本地 AI · 请勿分享密码、验证码、配送码、付款信息或身份证件。",
+    "ru": "Локальный ИИ · Не отправляйте пароли, коды подтверждения или доставки, платёжные данные и документы."
+  },
+  "Chat with uBeer": {
+    "fr": "Jaser avec uBeer",
+    "it": "Chatta con uBeer",
+    "es": "Chatea con uBeer",
+    "zh": "联系 uBeer",
+    "ru": "Чат с uBeer"
   }
 };

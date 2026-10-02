@@ -14,10 +14,13 @@ Customer / Driver / Admin PWA (React 19, Vite)
         Fastify API (Node 24)
           ├── PostgreSQL 18 (Prisma)
           ├── Redis 7 (rate limits + BullMQ reconciliation)
+          ├── Ollama (local AI support)
           └── BTCPay Greenfield API + signed webhooks
 ```
 
 The customer, driver and admin views are one React app, with separate routes and layouts. The API is Fastify; its plugin system keeps request parsing, security headers, cookies, CORS and rate limits explicit. PostgreSQL is the source of truth for orders, refresh tokens and audit history. Redis stores distributed rate-limit state and schedules invoice reconciliation. Email uses a pluggable transport with a structured console transport by default.
+
+The support chat is a global React widget on every route. Its messages go to the Fastify API, which builds a platform prompt and current region/catalog snapshot, then calls the local Ollama service; the browser never connects to Ollama directly.
 
 The interface supports English, French, Italian, Spanish, Simplified Chinese and Russian. It follows the browser language by default, uses the host's GeoIP database to choose French for visitors in Quebec, and applies each delivery region's configured language after a customer checks an address. Customers can change the language from the header. Montreal regions default to French.
 
@@ -26,6 +29,12 @@ The interface supports English, French, Italian, Spanish, Simplified Chinese and
 The customer, driver and admin workflows are delivered in one installable, mobile-first PWA, so users can install uBeer from their phone browser without a native build. On iPhone or iPad, open uBeer in Safari and choose **Share → Add to Home Screen**. On Android, open it in Chrome and choose **Install app** (or **Add to Home screen**). The app menu links to customer orders, the driver console and admin; the home-screen shortcuts open customer orders and the driver app directly.
 
 The home page's **Download the uBeer mobile app** button opens the platform install prompt or phone-specific instructions. The generated artwork is in `apps/web/public/images/`; the transparent Heineken pack image is the product-card artwork and the other scenes are used on the welcome, driver, waitlist and delivered-order views. The site also includes a 24-hour delivery promotion and a 2,000+ cryptocurrency acceptance banner.
+
+## AI support chat
+
+The floating uBeer Support chat appears throughout the customer, driver and admin pages. It uses the locally running Ollama model `ghunghab/qwen2.5-1.5b:q4km` through `POST /api/support/chat`, answers in the selected app language, and receives current active-region and in-stock catalog facts from PostgreSQL. It is rate-limited to 12 messages per IP per minute. The prompt covers address validation, delivery coverage, product pricing, crypto checkout, order tracking, driver onboarding, app installation, and account-safety boundaries. It does not access customer orders or take actions on behalf of the user.
+
+The API connects only to a loopback Ollama URL. Set `OLLAMA_BASE_URL` and `OLLAMA_MODEL` in `.env` to override their defaults; chat messages are sent to this local model service and are not written to the uBeer database. Users are told not to share passwords, verification or delivery codes, payment details, or identity documents in the chat.
 
 Region geometry is stored as GeoJSON JSONB. The API performs authoritative polygon, multipolygon and circle checks for customer lookups, checkout and driver assignment. Leaflet and OpenStreetMap render the admin region map; Leaflet Draw creates polygon boundaries.
 
@@ -89,6 +98,8 @@ PostgreSQL is expected to run on the host. Redis is the only container in the co
 | `BTCPAY_STORE_ID` | BTCPay store identifier. |
 | `BTCPAY_API_KEY` | Greenfield API key with invoice read/create access. |
 | `BTCPAY_WEBHOOK_SECRET` | Secret used to verify webhook HMAC signatures. |
+| `OLLAMA_BASE_URL` | Loopback address for local Ollama; defaults to `http://127.0.0.1:11434`. |
+| `OLLAMA_MODEL` | Local Ollama model; defaults to `ghunghab/qwen2.5-1.5b:q4km`. |
 | `SMTP_URL` | Reserved for the SMTP mail transport adapter. |
 
 ## BTCPay Setup
