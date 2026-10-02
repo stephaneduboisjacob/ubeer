@@ -92,7 +92,7 @@ Configure a webhook in BTCPay after the public endpoint is deployed:
 - **Events:** `InvoiceCreated`, `InvoiceReceivedPayment`, `InvoiceProcessing`, `InvoiceSettled`, `InvoiceExpired`, `InvoiceInvalid`
 - Put the values in the ignored project `.env` file on the server: `BTCPAY_STORE_ID`, `BTCPAY_API_KEY`, and `BTCPAY_WEBHOOK_SECRET`.
 
-The API creates invoices in USD and records the invoice ID and hosted checkout link on the order. It redirects back to the order status view after payment. Webhooks require a valid `BTCPAY-WEBHOOK-SIG` HMAC-SHA256 signature; delivery IDs are unique in the database, so retries are idempotent. A BullMQ scheduler checks pending invoices older than ten minutes every five minutes. The actual BTCPay credentials are deliberately not included in this repository.
+The API creates invoices in USD and records the invoice ID and hosted checkout link on the order. It redirects back to the order status view after payment. Webhooks require a valid HMAC-SHA256 signature from `BTCPay-Sig` (BTCPay's documented header) or `BTCPAY-WEBHOOK-SIG`; delivery IDs are unique in the database, so retries are idempotent. A BullMQ scheduler checks pending invoices older than ten minutes every five minutes. Credential values are supplied only through the server environment.
 
 ## Build and verification
 

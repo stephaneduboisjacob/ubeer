@@ -350,7 +350,7 @@ async function transitionInvoice(deliveryId: string, eventType: string, invoiceI
 
 app.post("/api/webhooks/btcpay", { config: { rateLimit: { max: 120, timeWindow: "1 minute" } } }, async (request, reply) => {
   if (!process.env.BTCPAY_WEBHOOK_SECRET) return reply.code(503).send({ error: "BTCPay webhook secret is not configured" });
-  const signature = request.headers["btcpay-webhook-sig"] as string | undefined;
+  const signature = (request.headers["btcpay-webhook-sig"] ?? request.headers["btcpay-sig"]) as string | undefined;
   if (!verifyWebhookSignature(request.rawBody, signature)) return reply.code(401).send({ error: "Invalid webhook signature" });
   const schema = z.object({ deliveryId: z.string().min(1).max(200), type: z.string().min(1).max(100), invoiceId: z.string().min(1).max(200).optional() });
   const event = schema.safeParse(request.body);
