@@ -225,7 +225,7 @@ ${await currentSupportPlatformContext()}`;
         messages: [{ role: "system", content: systemPrompt }, ...messages],
         stream: false,
         keep_alive: "10m",
-        options: { temperature: 0.3, num_ctx: 8192, num_predict: 320 },
+        options: { temperature: 0.3, num_ctx: 8192, num_predict: 120 },
       }),
       signal: AbortSignal.timeout(50_000),
     });
