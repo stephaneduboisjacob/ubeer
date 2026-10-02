@@ -53,7 +53,7 @@ PostgreSQL is expected to run on the host. Redis is the only container in the co
    npm run db:seed
    ```
 
-   Seeding creates `admin@ubeer.local` with a random password and TOTP secret, a clearly marked Downtown Victoria test region, the `$30.00` test Heineken six-pack, and one pending driver application. The seed prints the initial admin credentials once and writes them to `/root/ubeer-admin-credentials.txt` with mode `0600`. Run the seed as root when that exact credentials file is required; the seed is idempotent and does not recreate credentials for an existing admin.
+   Seeding creates `admin@ubeer.local` with a random password and TOTP secret, a clearly marked test region following the Island of Montréal shoreline, the `$30.00` test Heineken six-pack, and one pending driver application. The checked-in boundary is a simplified OpenStreetMap polygon; generated art and client-side maps are never used for delivery eligibility. The seed prints the initial admin credentials once and writes them to `/root/ubeer-admin-credentials.txt` with mode `0600`. Run the seed as root when that exact credentials file is required; the seed is idempotent and does not recreate credentials for an existing admin.
 
 3. Run the API and web app in separate terminals:
 

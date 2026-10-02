@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { PrismaClient, UserRole, DriverApplicationStatus } from "@prisma/client";
 import { authenticator } from "otplib";
@@ -11,12 +11,19 @@ loadEnv();
 const prisma = new PrismaClient();
 
 async function main() {
-  const polygon = {
-    type: "Polygon",
-    coordinates: [[[-123.374, 48.418], [-123.354, 48.418], [-123.354, 48.431], [-123.374, 48.431], [-123.374, 48.418]]],
-  };
-  let region = await prisma.region.findFirst({ where: { name: "Test Region — Downtown" } });
-  if (!region) region = await prisma.region.create({ data: { name: "Test Region — Downtown", geometry: polygon, active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 } });
+  const geometry = JSON.parse(await readFile(new URL("./data/montreal-island.geojson", import.meta.url), "utf8"));
+  const seededRegion = await prisma.region.findFirst({
+    where: { name: { in: ["Test Region — Montréal Island", "Test Region — Downtown"] } },
+    orderBy: { createdAt: "asc" },
+  });
+  const region = seededRegion
+    ? await prisma.region.update({
+      where: { id: seededRegion.id },
+      data: { name: "Test Region — Montréal Island", geometry, active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
+    })
+    : await prisma.region.create({
+      data: { name: "Test Region — Montréal Island", geometry, active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
+    });
 
   const existingAdmin = await prisma.user.findUnique({ where: { email: "admin@ubeer.local" } });
   if (!existingAdmin) {
