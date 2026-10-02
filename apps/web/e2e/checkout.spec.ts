@@ -3,18 +3,23 @@ import { expect, test } from "@playwright/test";
 test("customer finds their region, adds the test pack, and gets a BTCPay checkout link", async ({ page }) => {
   const regionId = "11a0df5d-4f8c-43d6-b2b6-7c66bc5c189e";
   const productId = "be5a078a-f682-4fd8-aa68-8731508d05f2";
-  await page.route("**/api/geocode**", (route) => route.fulfill({ json: { latitude: 45.5019, longitude: -73.5674, label: "Downtown Montréal" } }));
+  await page.route("**/api/geocode**", (route) => route.fulfill({ json: { results: [
+    { id: "way/1234", latitude: 45.5071834, longitude: -73.5648129, label: "100, Rue Sainte-Catherine Ouest, Montréal, Québec, H5B 1E5, Canada", precision: "street_address" },
+    { id: "way/5678", latitude: 45.5072834, longitude: -73.5647129, label: "101, Rue Sainte-Catherine Ouest, Montréal, Québec, H5B 1E5, Canada", precision: "street_address" },
+  ] } }));
   await page.route("**/api/regions/check**", (route) => route.fulfill({ json: { available: true, region: { id: regionId, name: "Test Region — Montréal Island", ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 } } }));
   await page.route("**/api/catalog**", (route) => route.fulfill({ json: { region: { id: regionId, name: "Test Region — Montréal Island", ageGate: 19, deliveryFeeCents: 500 }, products: [{ id: productId, name: "6-Pack Heineken Beer", description: "Test listing: six-pack of Heineken beer.", priceCents: 3000, stock: 999, isTest: true }] } }));
   await page.route("**/api/cart/validate", (route) => route.fulfill({ json: { valid: true } }));
   await page.route("**/api/checkout", (route) => route.fulfill({ status: 201, json: { orderId: "96373de7-c381-4ed3-b999-c70ae04731a7", checkoutLink: "https://payments.btcpay.exchange/i/test-invoice", statusToken: "test-status-token-0123456789-abcdef", deliveryCode: "084216" } }));
 
   await page.goto("/");
-  await page.getByRole("textbox", { name: "Address or postal code" }).first().fill("Downtown Montréal");
+  await page.getByRole("textbox", { name: "Address or postal code" }).first().fill("100 Rue Sainte-Catherine Ouest, Montréal");
   await page.getByRole("button", { name: "Check delivery area" }).click();
+  await page.getByRole("option").first().click();
   await expect(page.getByText("Good news — we deliver to Test Region — Montréal Island.")).toBeVisible();
   await page.getByRole("button", { name: "Add one" }).click();
   await page.getByLabel("Email for your receipt").fill("customer@example.test");
+  await expect(page.getByLabel("Delivery address")).toHaveValue("100, Rue Sainte-Catherine Ouest, Montréal, Québec, H5B 1E5, Canada");
   await page.getByRole("checkbox", { name: /I confirm I am at least 19 years old/ }).check();
   await page.getByRole("button", { name: "Continue to secure checkout" }).click();
   await expect(page.getByText("084216")).toBeVisible();

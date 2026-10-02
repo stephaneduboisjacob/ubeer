@@ -169,6 +169,7 @@ model Order {
   regionId           String       @map("region_id") @db.Uuid
   driverId           String?      @map("driver_id") @db.Uuid
   status             OrderStatus  @default(pending_payment)
+  deliveryAddress   String?      @map("delivery_address")
   latitude           Float
   longitude          Float
   subtotalCents      Int          @map("subtotal_cents")

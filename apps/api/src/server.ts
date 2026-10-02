@@ -15,6 +15,7 @@ import { z, ZodError } from "zod";
 import { checkoutSchema, loginSchema, regionCheckSchema, waitlistSchema } from "@ubeer/shared";
 import { BtcpayClient, BtcpayConfigurationError, verifyWebhookSignature } from "./btcpay.js";
 import { distanceBetween, pointInRegion } from "./geofence.js";
+import { searchAddressCandidates } from "./geocoding.js";
 import { clearSession, hashPassword, issueSession, passwordMatches, requireRole, sessionUser, tokenHash, verifyTotp } from "./auth.js";
 import { sendMail } from "./email.js";
 import { loadEnv } from "./env.js";
@@ -51,7 +52,6 @@ await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024, files: 1, f
 
 const zodJson = (schema: z.ZodTypeAny, value: unknown) => schema.safeParse(value);
 const idParam = z.object({ id: z.string().uuid() });
-const coordinateQuery = z.object({ latitude: z.coerce.number().min(-90).max(90), longitude: z.coerce.number().min(-180).max(180) });
 const writeAudit = (request: FastifyRequest, actorId: string | null, action: string, targetType: string, targetId?: string, metadata?: Prisma.InputJsonValue) =>
   db.auditLog.create({ data: { actorId, action, targetType, targetId, metadata, ipAddress: request.ip } });
 const safeEqualString = (left: string, right: string) => {
@@ -78,8 +78,8 @@ app.get("/api/regions", async () => {
   return { regions };
 });
 
-app.get("/api/regions/check", async (request, reply) => {
-  const parsed = coordinateQuery.safeParse(request.query);
+app.post("/api/regions/check", async (request, reply) => {
+  const parsed = regionCheckSchema.safeParse(request.body);
   if (!parsed.success) return reply.code(400).send({ error: "Valid latitude and longitude are required" });
   const coordinate = { latitude: parsed.data.latitude, longitude: parsed.data.longitude };
   const regions = await db.region.findMany({ where: { active: true } });
@@ -87,20 +87,15 @@ app.get("/api/regions/check", async (request, reply) => {
   return region ? { available: true, region: { id: region.id, name: region.name, minimumOrderCents: region.minimumOrderCents, deliveryFeeCents: region.deliveryFeeCents, ageGate: region.ageGate } } : { available: false, region: null };
 });
 
-app.get("/api/geocode", { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } }, async (request, reply) => {
-  const parsed = z.object({ query: z.string().trim().min(3).max(180) }).safeParse(request.query);
-  if (!parsed.success) return reply.code(400).send({ error: "Enter a street address, city, or postal code" });
+app.post("/api/geocode", { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } }, async (request, reply) => {
+  const parsed = z.object({ query: z.string().trim().min(3).max(180) }).safeParse(request.body);
+  if (!parsed.success) return reply.code(400).send({ error: "Enter a full address or Canadian postal code" });
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(parsed.data.query)}`, {
-      headers: { "User-Agent": "uBeer/0.1 (regional delivery lookup)" }, signal: AbortSignal.timeout(8_000),
-    });
-    if (!response.ok) return reply.code(502).send({ error: "Address lookup is temporarily unavailable" });
-    const results = z.array(z.object({ lat: z.string(), lon: z.string(), display_name: z.string().optional() })).safeParse(await response.json());
-    const first = results.success ? results.data[0] : undefined;
-    if (!first) return reply.code(404).send({ error: "We could not find that location" });
-    return { latitude: Number(first.lat), longitude: Number(first.lon), label: first.display_name ?? parsed.data.query };
+    const results = await searchAddressCandidates(parsed.data.query);
+    if (!results.length) return reply.code(422).send({ error: "We could not verify a full street address or postal code. Add a street number, street name, or full Canadian postal code." });
+    return { results };
   } catch (error) {
-    request.log.warn({ err: error }, "geocoder request failed");
+    request.log.warn({ errorName: error instanceof Error ? error.name : "UnknownError" }, "geocoder request failed");
     return reply.code(502).send({ error: "Address lookup is temporarily unavailable" });
   }
 });
@@ -222,6 +217,7 @@ app.post("/api/checkout", { config: { rateLimit: { max: 8, timeWindow: "10 minut
           customerId: user?.id,
           customerEmail: data.customerEmail.toLowerCase(),
           regionId: region.id,
+          deliveryAddress: data.deliveryAddress,
           latitude: data.latitude,
           longitude: data.longitude,
           subtotalCents,
@@ -263,13 +259,13 @@ app.get("/api/orders/:id/status", async (request, reply) => {
   const user = await sessionUser(request, db);
   const hasToken = query.data.token ? safeEqualString(order?.statusAccessTokenHash ?? "", tokenHash(query.data.token)) : false;
   if (!order || (order.customerId !== user?.id && !hasToken)) return reply.code(404).send({ error: "Order not found" });
-  return { id: order.id, status: order.status, createdAt: order.createdAt, totalCents: order.totalCents, currency: order.currency, items: order.items.map(({ productName, quantity, unitPriceCents }) => ({ productName, quantity, unitPriceCents })), regionName: order.region.name };
+  return { id: order.id, status: order.status, createdAt: order.createdAt, totalCents: order.totalCents, currency: order.currency, items: order.items.map(({ productName, quantity, unitPriceCents }) => ({ productName, quantity, unitPriceCents })), regionName: order.region.name, deliveryAddress: order.deliveryAddress };
 });
 
 app.get("/api/orders", async (request, reply) => {
   const user = await sessionUser(request, db);
   if (!user) return reply.code(401).send({ error: "Authentication required" });
-  const orders = await db.order.findMany({ where: { customerId: user.id }, orderBy: { createdAt: "desc" }, select: { id: true, status: true, createdAt: true, paidAt: true, totalCents: true, currency: true, region: { select: { name: true } }, items: { select: { productName: true, quantity: true, unitPriceCents: true } } } });
+  const orders = await db.order.findMany({ where: { customerId: user.id }, orderBy: { createdAt: "desc" }, select: { id: true, status: true, createdAt: true, paidAt: true, totalCents: true, currency: true, deliveryAddress: true, region: { select: { name: true } }, items: { select: { productName: true, quantity: true, unitPriceCents: true } } } });
   return { orders };
 });
 

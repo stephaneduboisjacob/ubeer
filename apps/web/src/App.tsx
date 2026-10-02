@@ -10,6 +10,8 @@ type Product = { id: string; name: string; description: string; priceCents: numb
 type User = { id: string; name: string | null; email: string; role: string };
 type Catalog = { region: Region; products: Product[] };
 type CheckoutResult = { orderId: string; checkoutLink: string; statusToken: string; deliveryCode: string };
+type AddressCandidate = { id: string; latitude: number; longitude: number; label: string; precision: "street_address" | "postal_code" };
+type SelectedLocation = { latitude: number; longitude: number; label: string; precision: AddressCandidate["precision"] | "current_location" };
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const options: RequestInit = {
@@ -61,9 +63,21 @@ function SiteHeader() {
   return <header className="site-header"><Link to="/" className="brand" onClick={closeMenu}><span className="brand-mark">u</span><span>ubeer<span className="brand-dot">.</span></span></Link><button className="mobile-menu-toggle" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? "×" : "☰"}</button><nav className={menuOpen ? "mobile-menu-open" : ""}><Link to="/account" onClick={closeMenu}>My orders</Link><Link to="/driver" onClick={closeMenu}>Driver app</Link><Link to="/admin" onClick={closeMenu}>Admin</Link><a className="nav-cta" href="/#shop" onClick={closeMenu}>Start an order <span>↗</span></a><InstallAppAction/></nav></header>;
 }
 
+function AddressResults({ results, onSelect }: { results: AddressCandidate[]; onSelect: (result: AddressCandidate) => void }) {
+  if (!results.length) return null;
+  return <div id="address-results" className="address-results" role="listbox" aria-label="Choose a matching address">
+    <b>Choose the matching location</b>
+    {results.map((result) => <button key={result.id} role="option" aria-selected="false" onClick={() => onSelect(result)}>
+      <span>{result.label}</span><small>{result.precision === "street_address" ? "Exact street address" : "Postal code estimate"}</small>
+    </button>)}
+  </div>;
+}
+
 function HomePage() {
   const [address, setAddress] = useState("");
-  const [location, setLocation] = useState<{ latitude: number; longitude: number; label?: string } | null>(null);
+  const [location, setLocation] = useState<SelectedLocation | null>(null);
+  const [addressCandidates, setAddressCandidates] = useState<AddressCandidate[]>([]);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [region, setRegion] = useState<Region | null>(null);
   const [checked, setChecked] = useState(false);
   const [cart, setCart] = useState<Record<string, number>>({});
@@ -78,33 +92,61 @@ function HomePage() {
   const itemCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
   const subtotalCents = products.reduce((sum, product) => sum + product.priceCents * (cart[product.id] ?? 0), 0);
 
+  useEffect(() => {
+    if (addressCandidates.length > 1) document.getElementById("address-results")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [addressCandidates]);
+
+  function updateAddress(value: string) {
+    setAddress(value);
+    setAddressCandidates([]);
+    setLocation(null);
+    setRegion(null);
+    setChecked(false);
+    setCart({});
+    setDeliveryAddress("");
+    setError("");
+    setNotice("");
+  }
+
   async function lookupAddress(event?: FormEvent) {
     event?.preventDefault();
-    if (!address.trim()) return;
-    setBusy(true); setError(""); setNotice(""); setChecked(false);
+    if (!address.trim()) { setError("Enter a full street address or Canadian postal code."); return; }
+    setBusy(true); setError(""); setNotice(""); setChecked(false); setRegion(null); setLocation(null); setCart({}); setAddressCandidates([]);
     try {
-      const found = await api<{ latitude: number; longitude: number; label: string }>(`/api/geocode?query=${encodeURIComponent(address)}`);
-      await checkCoordinate(found.latitude, found.longitude, found.label);
+      const found = await api<{ results: AddressCandidate[] }>("/api/geocode", { method: "POST", body: JSON.stringify({ query: address }) });
+      if (found.results.length === 1) await chooseAddress(found.results[0]!);
+      else setAddressCandidates(found.results);
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
   }
 
-  async function checkCoordinate(latitude: number, longitude: number, label?: string) {
+  async function chooseAddress(candidate: AddressCandidate) {
+    setAddressCandidates([]);
+    setAddress(candidate.label);
+    setDeliveryAddress(candidate.precision === "street_address" ? candidate.label : "");
+    await checkCoordinate(candidate.latitude, candidate.longitude, candidate.label, candidate.precision);
+  }
+
+  async function checkCoordinate(latitude: number, longitude: number, label: string, precision: SelectedLocation["precision"]) {
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await api<{ available: boolean; region: Region | null }>(`/api/regions/check?latitude=${latitude}&longitude=${longitude}`);
-      setLocation({ latitude, longitude, label }); setRegion(result.region); setChecked(true); setCart({});
+      const result = await api<{ available: boolean; region: Region | null }>("/api/regions/check", { method: "POST", body: JSON.stringify({ latitude, longitude }) });
+      setLocation({ latitude, longitude, label, precision }); setRegion(result.region); setChecked(true); setCart({});
       if (!result.available) setNotice("We are not delivering here just yet. Join the waitlist and we’ll let you know when we arrive.");
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
   }
 
+  function chooseCurrentAddress(candidate: AddressCandidate) {
+    void chooseAddress(candidate);
+  }
+
   function useMyLocation() {
     setError("");
     if (!navigator.geolocation) { setError("Location services are not available in this browser."); return; }
-    setBusy(true);
+    setAddressCandidates([]); setRegion(null); setLocation(null); setChecked(false); setCart({}); setDeliveryAddress(""); setBusy(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => void checkCoordinate(position.coords.latitude, position.coords.longitude, "Current location"),
+      (position) => void checkCoordinate(position.coords.latitude, position.coords.longitude, "Current location", "current_location"),
       () => { setBusy(false); setError("We could not access your location. Enter an address instead."); },
       { enableHighAccuracy: true, timeout: 10_000 },
     );
@@ -120,6 +162,7 @@ function HomePage() {
 
   async function addProduct(product: Product) {
     if (!region || !location) return;
+    if (location.precision === "postal_code") { setError("This postal code only gives an approximate service check. Search your exact street address to order."); return; }
     const nextQuantity = (cart[product.id] ?? 0) + 1;
     if (nextQuantity > 24) return;
     setError(""); setBusy(true);
@@ -133,12 +176,14 @@ function HomePage() {
   async function startCheckout(event: FormEvent) {
     event.preventDefault(); setError("");
     if (!region || !location) return;
+    if (location.precision === "postal_code") { setError("Search your exact street address before continuing to checkout."); return; }
     const items = Object.entries(cart).filter(([, quantity]) => quantity > 0).map(([productId, quantity]) => ({ productId, quantity }));
     if (!items.length) { setError("Add a product to your cart first."); return; }
     if (!ageVerified) { setError(`Please confirm that you are at least ${region.ageGate}.`); return; }
+    if (deliveryAddress.trim().length < 5) { setError("Enter the full street address where the order should be delivered."); return; }
     setBusy(true);
     try {
-      const result = await api<CheckoutResult>("/api/checkout", { method: "POST", body: JSON.stringify({ regionId: region.id, latitude: location.latitude, longitude: location.longitude, items, ageVerified, customerEmail: email }) });
+      const result = await api<CheckoutResult>("/api/checkout", { method: "POST", body: JSON.stringify({ regionId: region.id, deliveryAddress, latitude: location.latitude, longitude: location.longitude, items, ageVerified, customerEmail: email }) });
       sessionStorage.setItem(`ubeer-order-token:${result.orderId}`, result.statusToken);
       setCheckout(result);
     } catch (e) { setError((e as Error).message); }
@@ -153,11 +198,10 @@ function HomePage() {
         <p className="hero-lede">Thoughtful local delivery for the moments that make the evening. Find out if we’re in your neighbourhood.</p>
         <form className="address-search" onSubmit={lookupAddress}>
           <span className="pin-icon">⌖</span>
-          <input aria-label="Address or postal code" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter your address or postal code" />
+          <input aria-label="Address or postal code" value={address} onChange={(e) => updateAddress(e.target.value)} placeholder="Enter your address or postal code" />
           <button disabled={busy} aria-label="Check delivery area">{busy ? "…" : "→"}</button>
         </form>
         <button className="location-link" onClick={useMyLocation}><span>◎</span> Use my current location</button>
-        {error && <p className="form-error" role="alert">{error}</p>}
       </div>
       <div className="hero-art" aria-label="Illustration of a cold drink and local delivery bag">
         <div className="sun-orb" /><div className="art-caption"><span>GOOD DRINKS.</span><span>GOOD COMPANY.</span></div>
@@ -173,16 +217,18 @@ function HomePage() {
 
     <section className="shop-section" id="shop">
       <div className="section-heading"><div><div className="eyebrow">THE NEIGHBOURHOOD CHECK</div><h2>What’s in your<br/><span>neck of the woods?</span></h2></div><p>We deliver within the service areas our local drivers know best. Pop in your address and we’ll take a look.</p></div>
-      {!checked && <div className="availability-card"><div className="availability-symbol">⌖</div><div><h3>First, let’s find your corner.</h3><p>We’ll check your address against our active delivery areas.</p></div><form onSubmit={lookupAddress}><input aria-label="Address or postal code" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street, city or postal code"/><button className="button-dark" disabled={busy}>Check my area <span>→</span></button></form></div>}
+      {!checked && <div className="availability-card"><div className="availability-symbol">⌖</div><div><h3>First, let’s find your corner.</h3><p>We’ll check your address against our active delivery areas.</p></div><form onSubmit={lookupAddress}><input aria-label="Address or postal code" value={address} onChange={(e) => updateAddress(e.target.value)} placeholder="Street, city or postal code"/><button className="button-dark" disabled={busy}>Check my area <span>→</span></button></form></div>}
+      <AddressResults results={addressCandidates} onSelect={chooseCurrentAddress}/>
+      {error && !region && <p className="form-error" role="alert">{error}</p>}
       {checked && region && <div className="catalog-layout">
-        <div className="catalog-main"><div className="available-banner"><span className="available-dot"/><div><b>Good news — we deliver to {region.name}.</b><small>Delivery fee ${((region.deliveryFeeCents ?? 0) / 100).toFixed(2)} · {region.ageGate}+ only</small></div><button onClick={() => { setChecked(false); setRegion(null); setCart({}); }}>Change location</button></div>
+        <div className="catalog-main"><div className="available-banner"><span className="available-dot"/><div><b>Good news — we deliver to {region.name}.</b><small>Delivery fee ${((region.deliveryFeeCents ?? 0) / 100).toFixed(2)} · {region.ageGate}+ only</small>{location?.precision === "postal_code" && <small className="location-precision-note">Postal code coverage is approximate. Search your exact street address before ordering.</small>}</div><button onClick={() => { setChecked(false); setRegion(null); setLocation(null); setCart({}); setDeliveryAddress(""); }}>Change location</button></div>
           {catalogQuery.isLoading && <div className="loading-card">Loading the neighbourhood list…</div>}
-          {products.length > 0 && <div className="product-card"><div className="product-art"><div className="six-pack"><div className="pack-handle"/><div className="pack-cans"><i/><i/><i/><i/><i/><i/></div><div className="pack-front"><b>HEINEKEN</b><span>PURE MALT LAGER</span><i>★</i><small>6-PACK</small></div></div><div className="test-stamp">TEST<br/>LISTING</div></div><div className="product-info"><div className="product-tag">THE CLASSIC</div><h3>{products[0]!.name}</h3><p>{products[0]!.description}</p><div className="product-bottom"><div><b>${(products[0]!.priceCents / 100).toFixed(2)}</b><small>USD · 6 bottles</small></div><div className="quantity-control"><button onClick={() => setCart((prev) => ({ ...prev, [products[0]!.id]: Math.max(0, (prev[products[0]!.id] ?? 0) - 1) }))} aria-label="Remove one">−</button><span>{cart[products[0]!.id] ?? 0}</span><button disabled={busy} onClick={() => void addProduct(products[0]!)} aria-label="Add one">+</button></div></div></div></div>}
+          {products.length > 0 && <div className="product-card"><div className="product-art"><div className="six-pack"><div className="pack-handle"/><div className="pack-cans"><i/><i/><i/><i/><i/><i/></div><div className="pack-front"><b>HEINEKEN</b><span>PURE MALT LAGER</span><i>★</i><small>6-PACK</small></div></div><div className="test-stamp">TEST<br/>LISTING</div></div><div className="product-info"><div className="product-tag">THE CLASSIC</div><h3>{products[0]!.name}</h3><p>{products[0]!.description}</p><div className="product-bottom"><div><b>${(products[0]!.priceCents / 100).toFixed(2)}</b><small>USD · 6 bottles</small></div><div className="quantity-control"><button onClick={() => setCart((prev) => ({ ...prev, [products[0]!.id]: Math.max(0, (prev[products[0]!.id] ?? 0) - 1) }))} aria-label="Remove one">−</button><span>{cart[products[0]!.id] ?? 0}</span><button disabled={busy || location?.precision === "postal_code"} onClick={() => void addProduct(products[0]!)} aria-label="Add one">+</button></div></div></div></div>}
           {!catalogQuery.isLoading && products.length === 0 && <div className="loading-card">Nothing on the local menu yet. Check back soon.</div>}
         </div>
         <aside className="cart-card"><div className="cart-header"><span>YOUR BAG</span><span className="cart-count">{itemCount}</span></div><div className="cart-empty" hidden={itemCount > 0}><div className="cart-line-icon">⌁</div><b>A good evening starts somewhere.</b><p>Add something from the local list and we’ll get it moving.</p></div>
           {itemCount > 0 && <><div className="cart-summary"><span>{itemCount} × {products[0]?.name}</span><b>${(subtotalCents / 100).toFixed(2)}</b></div><div className="cart-summary muted"><span>Delivery fee</span><span>${((region.deliveryFeeCents ?? 0) / 100).toFixed(2)}</span></div><div className="cart-total"><span>Estimated total</span><b>${((subtotalCents + (region.deliveryFeeCents ?? 0)) / 100).toFixed(2)}</b></div>
-            <form onSubmit={startCheckout} className="checkout-form"><label>Email for your receipt<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com"/></label><label className="age-confirm"><input type="checkbox" checked={ageVerified} onChange={(e) => setAgeVerified(e.target.checked)}/><span>I confirm I am at least {region.ageGate} years old.</span></label><button className="button-dark full" disabled={busy || !ageVerified}>{busy ? "Getting checkout ready…" : "Continue to secure checkout ↗"}</button><p className="checkout-footnote">Bitcoin · Lightning · on-chain</p></form>
+            <form onSubmit={startCheckout} className="checkout-form"><label>Email for your receipt<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com"/></label><label>Delivery address<input type="text" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} minLength={5} maxLength={300} required placeholder="Street number, street, unit"/></label><label className="age-confirm"><input type="checkbox" checked={ageVerified} onChange={(e) => setAgeVerified(e.target.checked)}/><span>I confirm I am at least {region.ageGate} years old.</span></label><button className="button-dark full" disabled={busy || !ageVerified || !deliveryAddress.trim() || location?.precision === "postal_code"}>{busy ? "Getting checkout ready…" : "Continue to secure checkout ↗"}</button><p className="checkout-footnote">Bitcoin · Lightning · on-chain</p></form>
           </>}
           {error && <p className="form-error">{error}</p>}
         </aside>
@@ -201,10 +247,10 @@ function OrderStatusPage() {
   const [params] = useSearchParams();
   const token = params.get("token") ?? (id ? sessionStorage.getItem(`ubeer-order-token:${id}`) : null);
   const me = useQuery({ queryKey: ["current-user"], queryFn: () => api<{ user: User }>("/api/auth/me"), enabled: Boolean(id), retry: false });
-  const query = useQuery({ queryKey: ["order-status", id, token, me.data?.user.id], queryFn: () => api<{ id: string; status: string; totalCents: number; currency: string; regionName: string; items: Array<{ productName: string; quantity: number; unitPriceCents: number }> }>(`/api/orders/${id}/status${token ? `?token=${encodeURIComponent(token)}` : ""}`), enabled: Boolean(id && (token || me.data?.user)), refetchInterval: 5000 });
+  const query = useQuery({ queryKey: ["order-status", id, token, me.data?.user.id], queryFn: () => api<{ id: string; status: string; totalCents: number; currency: string; regionName: string; deliveryAddress: string | null; items: Array<{ productName: string; quantity: number; unitPriceCents: number }> }>(`/api/orders/${id}/status${token ? `?token=${encodeURIComponent(token)}` : ""}`), enabled: Boolean(id && (token || me.data?.user)), refetchInterval: 5000 });
   const stages = ["pending_payment", "paid", "accepted", "preparing", "out_for_delivery", "delivered"];
   const activeIndex = stages.indexOf(query.data?.status ?? "pending_payment");
-  return <main className="subpage narrow-page"><div className="eyebrow">ORDER TRACKING</div><h1>Your evening,<br/><span>in good hands.</span></h1>{query.isLoading && <div className="loading-card">Finding your order…</div>}{query.error && <div className="alert-error">{(query.error as Error).message}</div>}{query.data && <div className="tracking-card"><div className="tracking-head"><div><span className="eyebrow">ORDER</span><b>#{query.data.id.slice(0, 8).toUpperCase()}</b></div><span className="status-pill">{query.data.status.replaceAll("_", " ")}</span></div><div className="tracking-progress">{stages.map((stage, index) => <div className={`track-step ${index <= activeIndex ? "done" : ""}`} key={stage}><i>{index < activeIndex ? "✓" : index + 1}</i><span>{stage.replaceAll("_", " ")}</span></div>)}</div><div className="receipt-lines">{query.data.items.map((item) => <div key={item.productName}><span>{item.quantity} × {item.productName}</span><b>${((item.quantity * item.unitPriceCents) / 100).toFixed(2)}</b></div>)}</div><div className="tracking-total"><span>Delivering to {query.data.regionName}</span><b>${(query.data.totalCents / 100).toFixed(2)} {query.data.currency}</b></div><p>We refresh your order status automatically.</p></div>}<Link to="/" className="text-link">← Back to uBeer</Link></main>;
+  return <main className="subpage narrow-page"><div className="eyebrow">ORDER TRACKING</div><h1>Your evening,<br/><span>in good hands.</span></h1>{query.isLoading && <div className="loading-card">Finding your order…</div>}{query.error && <div className="alert-error">{(query.error as Error).message}</div>}{query.data && <div className="tracking-card"><div className="tracking-head"><div><span className="eyebrow">ORDER</span><b>#{query.data.id.slice(0, 8).toUpperCase()}</b></div><span className="status-pill">{query.data.status.replaceAll("_", " ")}</span></div><div className="tracking-progress">{stages.map((stage, index) => <div className={`track-step ${index <= activeIndex ? "done" : ""}`} key={stage}><i>{index < activeIndex ? "✓" : index + 1}</i><span>{stage.replaceAll("_", " ")}</span></div>)}</div><div className="receipt-lines">{query.data.items.map((item) => <div key={item.productName}><span>{item.quantity} × {item.productName}</span><b>${((item.quantity * item.unitPriceCents) / 100).toFixed(2)}</b></div>)}</div><div className="tracking-total"><span>Delivering to {query.data.deliveryAddress || query.data.regionName}</span><b>${(query.data.totalCents / 100).toFixed(2)} {query.data.currency}</b></div><p>We refresh your order status automatically.</p></div>}<Link to="/" className="text-link">← Back to uBeer</Link></main>;
 }
 
 function AccountPage() {
@@ -212,7 +258,7 @@ function AccountPage() {
   const [register, setRegister] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const ordersQuery = useQuery({ queryKey: ["customer-orders"], queryFn: () => api<{ orders: Array<{ id: string; status: string; createdAt: string; totalCents: number; currency: string; region: { name: string }; items: Array<{ productName: string; quantity: number }> }> }>("/api/orders"), enabled: Boolean(user), refetchInterval: 30_000 });
+  const ordersQuery = useQuery({ queryKey: ["customer-orders"], queryFn: () => api<{ orders: Array<{ id: string; status: string; createdAt: string; totalCents: number; currency: string; deliveryAddress: string | null; region: { name: string }; items: Array<{ productName: string; quantity: number }> }> }>("/api/orders"), enabled: Boolean(user), refetchInterval: 30_000 });
   useEffect(() => { void api<{ user: User }>("/api/auth/me").then((result) => setUser(result.user)).catch(() => undefined); }, []);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setBusy(true);
@@ -224,7 +270,7 @@ function AccountPage() {
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
   }
-  return <main className="subpage account-page"><div className="eyebrow">YOUR UBEER ACCOUNT</div><h1>Good to see<br/><span>you again.</span></h1>{!user ? <div className="account-login form-card"><h2>{register ? "Create an account" : "Sign in to your orders"}</h2>{error && <div className="alert-error">{error}</div>}<form onSubmit={submit}>{register && <label>Your name<input name="name" required minLength={2}/></label>}<label>Email<input name="email" type="email" required/></label><label>Password<input name="password" type="password" minLength={12} required/></label><button className="button-dark full" disabled={busy}>{busy ? "One moment…" : register ? "Create account →" : "Sign in →"}</button></form><button className="account-switch" onClick={() => { setRegister((value) => !value); setError(""); }}>{register ? "Already have an account? Sign in" : "New here? Create an account"}</button></div> : <section className="account-orders"><div className="account-heading"><div><span className="eyebrow">SIGNED IN AS</span><b>{user.email}</b></div><button onClick={() => void api("/api/auth/logout", { method: "POST" }).then(() => setUser(null))}>Sign out ↗</button></div><h2>Your orders</h2>{ordersQuery.isLoading && <div className="loading-card">Loading order history…</div>}{ordersQuery.data?.orders.length ? ordersQuery.data.orders.map((order) => <Link className="history-order" to={`/orders/${order.id}/status`} key={order.id}><div><b>#{order.id.slice(0, 8).toUpperCase()}</b><small>{new Date(order.createdAt).toLocaleDateString()} · {order.region.name}</small><small>{order.items.map((item) => `${item.quantity} × ${item.productName}`).join(", ")}</small></div><div><span className="status-pill">{order.status.replaceAll("_", " ")}</span><b>${(order.totalCents / 100).toFixed(2)} {order.currency}</b></div></Link>) : !ordersQuery.isLoading && <div className="loading-card">No orders yet. Find your neighbourhood and start your first order.</div>}</section>}<Link to="/" className="text-link">← Browse uBeer</Link></main>;
+  return <main className="subpage account-page"><div className="eyebrow">YOUR UBEER ACCOUNT</div><h1>Good to see<br/><span>you again.</span></h1>{!user ? <div className="account-login form-card"><h2>{register ? "Create an account" : "Sign in to your orders"}</h2>{error && <div className="alert-error">{error}</div>}<form onSubmit={submit}>{register && <label>Your name<input name="name" required minLength={2}/></label>}<label>Email<input name="email" type="email" required/></label><label>Password<input name="password" type="password" minLength={12} required/></label><button className="button-dark full" disabled={busy}>{busy ? "One moment…" : register ? "Create account →" : "Sign in →"}</button></form><button className="account-switch" onClick={() => { setRegister((value) => !value); setError(""); }}>{register ? "Already have an account? Sign in" : "New here? Create an account"}</button></div> : <section className="account-orders"><div className="account-heading"><div><span className="eyebrow">SIGNED IN AS</span><b>{user.email}</b></div><button onClick={() => void api("/api/auth/logout", { method: "POST" }).then(() => setUser(null))}>Sign out ↗</button></div><h2>Your orders</h2>{ordersQuery.isLoading && <div className="loading-card">Loading order history…</div>}{ordersQuery.data?.orders.length ? ordersQuery.data.orders.map((order) => <Link className="history-order" to={`/orders/${order.id}/status`} key={order.id}><div><b>#{order.id.slice(0, 8).toUpperCase()}</b><small>{new Date(order.createdAt).toLocaleDateString()} · {order.region.name}</small><small>{order.deliveryAddress || "Delivery address unavailable"}</small><small>{order.items.map((item) => `${item.quantity} × ${item.productName}`).join(", ")}</small></div><div><span className="status-pill">{order.status.replaceAll("_", " ")}</span><b>${(order.totalCents / 100).toFixed(2)} {order.currency}</b></div></Link>) : !ordersQuery.isLoading && <div className="loading-card">No orders yet. Find your neighbourhood and start your first order.</div>}</section>}<Link to="/" className="text-link">← Browse uBeer</Link></main>;
 }
 
 function DriverPage() {
@@ -284,7 +330,7 @@ function DriverPage() {
   const orderNext: Record<string, string> = { paid: "accepted", accepted: "preparing", preparing: "out_for_delivery", out_for_delivery: "delivered" };
   return <main className="subpage driver-page"><div className="driver-intro"><div className="eyebrow">GOOD PEOPLE, GOOD ROUTES</div><h1>Get paid to<br/><span>know your way.</span></h1><p>Join a local crew delivering great evenings across the neighbourhood.</p></div>
     {error && <div className="alert-error">{error}</div>}{notice && <div className="alert-success">{notice}</div>}
-    {user ? <div className="driver-dashboard"><div className="driver-toolbar"><div><span className="eyebrow">DRIVER CONSOLE</span><h2>Hey, {user.name || user.email.split("@")[0]}.</h2></div><div className="driver-toolbar-right"><span className="driver-earnings">EARNED <b>${((earningsQuery.data?.totalEarningsCents ?? 0) / 100).toFixed(2)}</b></span><button className={`online-toggle ${online ? "is-online" : ""}`} onClick={toggleOnline}><i/> {online ? "You’re online" : "Go online"}</button></div></div><div className="driver-section-title"><h3>Your assignments</h3><span>Refreshes every 10 sec</span></div>{ordersQuery.data?.orders.length ? ordersQuery.data.orders.map((order) => { const mapsUrl = `https://www.openstreetmap.org/directions?to=${encodeURIComponent(`${String(order.latitude)},${String(order.longitude)}`)}`; return <div className="driver-order" key={String(order.id)}><div><b>Order #{String(order.id).slice(0, 8).toUpperCase()}</b><small>{String(order.status).replaceAll("_", " ")} · {String(order.customerEmail)}</small><a className="driver-map-link" href={mapsUrl} target="_blank" rel="noreferrer">Open delivery location in maps ↗</a></div><div className="driver-order-actions"><button className="button-dark" onClick={() => void orderAction(String(order.id), orderNext[String(order.status)] ?? "accepted")}>{String(orderNext[String(order.status)] ?? "accepted").replaceAll("_", " ")} →</button>{order.status === "paid" && <button className="decline-order" onClick={() => void declineOrder(String(order.id))}>Decline</button>}</div></div>; }) : <div className="loading-card">No orders assigned yet. Keep your location on while you’re available.</div>}</div> : <div className="driver-forms"><div className="driver-login form-card"><div className="eyebrow">ALREADY ON THE CREW?</div><h2>Driver sign in</h2><form onSubmit={login}><label>Email<input name="email" type="email" required placeholder="you@example.com"/></label><label>Password<input name="password" type="password" required minLength={12} placeholder="Your password"/></label><button className="button-dark full" disabled={busy}>Sign in →</button></form><p>Approved drivers only. Your account starts after admin review.</p></div><div className="driver-application form-card"><div className="eyebrow">COME DRIVE WITH US</div><h2>Apply to drive</h2><form onSubmit={application}><div className="two-fields"><label>Full name<input name="name" required minLength={2}/></label><label>Phone<input name="phone" type="tel" required/></label></div><label>Email<input name="email" type="email" required/></label><div className="two-fields"><label>Vehicle<input name="vehicle" required placeholder="Car, bicycle…"/></label><label>License number<input name="licenseNumber" required/></label></div><label>Preferred region<select name="regionId" required defaultValue=""><option value="" disabled>Select a region</option>{regionData?.regions.map((region) => <option key={region.id} value={region.id}>{region.name}</option>)}</select></label><label>ID document <small className="field-hint">JPEG, PNG or PDF · 5 MB maximum</small><input name="idDocument" type="file" accept="image/jpeg,image/png,application/pdf" required/></label><button className="button-dark full" disabled={busy}>Send application ↗</button></form><p>Your documents are stored securely and can only be accessed by the admin team.</p></div></div>}
+    {user ? <div className="driver-dashboard"><div className="driver-toolbar"><div><span className="eyebrow">DRIVER CONSOLE</span><h2>Hey, {user.name || user.email.split("@")[0]}.</h2></div><div className="driver-toolbar-right"><span className="driver-earnings">EARNED <b>${((earningsQuery.data?.totalEarningsCents ?? 0) / 100).toFixed(2)}</b></span><button className={`online-toggle ${online ? "is-online" : ""}`} onClick={toggleOnline}><i/> {online ? "You’re online" : "Go online"}</button></div></div><div className="driver-section-title"><h3>Your assignments</h3><span>Refreshes every 10 sec</span></div>{ordersQuery.data?.orders.length ? ordersQuery.data.orders.map((order) => { const mapsUrl = `https://www.openstreetmap.org/directions?to=${encodeURIComponent(`${String(order.latitude)},${String(order.longitude)}`)}`; return <div className="driver-order" key={String(order.id)}><div><b>Order #{String(order.id).slice(0, 8).toUpperCase()}</b><small className="driver-delivery-address">{String(order.deliveryAddress ?? "Delivery address unavailable")}</small><small>{String(order.status).replaceAll("_", " ")} · {String(order.customerEmail)}</small><a className="driver-map-link" href={mapsUrl} target="_blank" rel="noreferrer">Open delivery location in maps ↗</a></div><div className="driver-order-actions"><button className="button-dark" onClick={() => void orderAction(String(order.id), orderNext[String(order.status)] ?? "accepted")}>{String(orderNext[String(order.status)] ?? "accepted").replaceAll("_", " ")} →</button>{order.status === "paid" && <button className="decline-order" onClick={() => void declineOrder(String(order.id))}>Decline</button>}</div></div>; }) : <div className="loading-card">No orders assigned yet. Keep your location on while you’re available.</div>}</div> : <div className="driver-forms"><div className="driver-login form-card"><div className="eyebrow">ALREADY ON THE CREW?</div><h2>Driver sign in</h2><form onSubmit={login}><label>Email<input name="email" type="email" required placeholder="you@example.com"/></label><label>Password<input name="password" type="password" required minLength={12} placeholder="Your password"/></label><button className="button-dark full" disabled={busy}>Sign in →</button></form><p>Approved drivers only. Your account starts after admin review.</p></div><div className="driver-application form-card"><div className="eyebrow">COME DRIVE WITH US</div><h2>Apply to drive</h2><form onSubmit={application}><div className="two-fields"><label>Full name<input name="name" required minLength={2}/></label><label>Phone<input name="phone" type="tel" required/></label></div><label>Email<input name="email" type="email" required/></label><div className="two-fields"><label>Vehicle<input name="vehicle" required placeholder="Car, bicycle…"/></label><label>License number<input name="licenseNumber" required/></label></div><label>Preferred region<select name="regionId" required defaultValue=""><option value="" disabled>Select a region</option>{regionData?.regions.map((region) => <option key={region.id} value={region.id}>{region.name}</option>)}</select></label><label>ID document <small className="field-hint">JPEG, PNG or PDF · 5 MB maximum</small><input name="idDocument" type="file" accept="image/jpeg,image/png,application/pdf" required/></label><button className="button-dark full" disabled={busy}>Send application ↗</button></form><p>Your documents are stored securely and can only be accessed by the admin team.</p></div></div>}
   </main>;
 }
 

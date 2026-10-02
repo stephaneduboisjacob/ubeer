@@ -23,6 +23,7 @@ export const regionCheckSchema = coordinateSchema;
 
 export const checkoutSchema = z.object({
   regionId: z.string().uuid(),
+  deliveryAddress: z.string().trim().min(5).max(300),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   items: z.array(z.object({ productId: z.string().uuid(), quantity: z.number().int().min(1).max(24) })).min(1),

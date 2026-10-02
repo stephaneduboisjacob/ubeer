@@ -25,6 +25,8 @@ The customer, driver and admin workflows are delivered in one installable, mobil
 
 Region geometry is stored as GeoJSON JSONB. The API performs authoritative polygon, multipolygon and circle checks for customer lookups, checkout and driver assignment. Leaflet and OpenStreetMap render the admin region map; Leaflet Draw creates polygon boundaries.
 
+Customer address lookup posts the typed query to Nominatim without putting the address in a URL or access log. The API returns only verified street-address or full Canadian postal-code matches; ambiguous matches are shown for the customer to select. The selected point is checked against active delivery polygons on the server. Postal-code checks are marked approximate and cannot be checked out until an exact street address is selected. Cart and checkout requests repeat the server-side boundary check, and checkout saves the delivery address and coordinates for customer tracking and driver navigation.
+
 ## Requirements
 
 - Node.js 24 and npm 11
