@@ -1333,12 +1333,12 @@ export const translations: Record<string, Partial<Record<Locale, string>>> = {
     "zh": "审查驱动程序申请 ↗",
     "ru": "Обзор приложений-драйверов ↗"
   },
-  "Draw a polygon or rectangle to define a service area. The test region follows the Island of Montréal coastline.": {
-    "fr": "Dessinez un polygone ou un rectangle pour définir une zone de service. La région test suit le littoral de l'île de Montréal.",
-    "it": "Disegna un poligono o un rettangolo per definire un'area di servizio. La regione di prova segue la costa dell'isola di Montréal.",
-    "es": "Dibuje un polígono o rectángulo para definir un área de servicio. La región de prueba sigue la costa de la isla de Montreal.",
-    "zh": "绘制多边形或矩形来定义服务区。测试区域沿着蒙特利尔岛海岸线。",
-    "ru": "Нарисуйте многоугольник или прямоугольник, чтобы определить зону обслуживания. Тестовый регион проходит вдоль береговой линии острова Монреаль."
+  "Draw a polygon or rectangle to define a service area along the Island of Montréal coastline.": {
+    "fr": "Dessinez un polygone ou un rectangle pour définir une zone de service le long du littoral de l'île de Montréal.",
+    "it": "Disegna un poligono o un rettangolo per definire un'area di servizio lungo la costa dell'isola di Montréal.",
+    "es": "Dibuje un polígono o un rectángulo para definir un área de servicio a lo largo de la costa de la isla de Montreal.",
+    "zh": "绘制多边形或矩形，以沿蒙特利尔岛海岸线定义服务区域。",
+    "ru": "Нарисуйте многоугольник или прямоугольник, чтобы определить зону обслуживания вдоль береговой линии острова Монреаль."
   },
   "REGION DETAILS": {
     "fr": "DÉTAILS DE LA RÉGION",
@@ -1703,6 +1703,27 @@ export const translations: Record<string, Partial<Record<Locale, string>>> = {
     "es": "Descargue la aplicación móvil uBeer",
     "zh": "下载uBeer移动应用程序",
     "ru": "Загрузите мобильное приложение uBeer"
+  },
+  "Download Android app": {
+    "fr": "Télécharger l'application Android",
+    "it": "Scarica l'app Android",
+    "es": "Descargar la aplicación Android",
+    "zh": "下载 Android 应用",
+    "ru": "Скачать приложение для Android"
+  },
+  "Install Android app": {
+    "fr": "Installer l'application Android",
+    "it": "Installa l'app Android",
+    "es": "Instalar la aplicación Android",
+    "zh": "安装 Android 应用",
+    "ru": "Установить приложение для Android"
+  },
+  "Download Android APK": {
+    "fr": "Télécharger l'APK Android",
+    "it": "Scarica l'APK Android",
+    "es": "Descargar APK de Android",
+    "zh": "下载 Android APK",
+    "ru": "Скачать APK для Android"
   },
   "Language": {
     "fr": "Langue",
@@ -2194,12 +2215,12 @@ export const translations: Record<string, Partial<Record<Locale, string>>> = {
     "zh": "测试商品：六瓶装喜力啤酒。",
     "ru": "Тестовый товар: упаковка из шести бутылок Heineken."
   },
-  "Test Region — Montréal Island": {
-    "fr": "Région test — île de Montréal",
-    "it": "Regione di prova — Isola di Montréal",
-    "es": "Región de prueba — Isla de Montreal",
-    "zh": "测试区域 — 蒙特利尔岛",
-    "ru": "Тестовый регион — остров Монреаль"
+  "Montréal Island": {
+    "fr": "Île de Montréal",
+    "it": "Isola di Montréal",
+    "es": "Isla de Montreal",
+    "zh": "蒙特利尔岛",
+    "ru": "Остров Монреаль"
   },
   "pending payment": {
     "fr": "en attente de paiement",

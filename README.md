@@ -5,7 +5,7 @@ uBeer is a region-gated alcohol delivery marketplace. Customers check a delivery
 ## Architecture
 
 ```text
-Customer / Driver / Admin PWA (React 19, Vite)
+Customer / Driver / Admin PWA + Android APK (React 19, Vite, native shell)
                      │ HTTPS
                      ▼
            Nginx (TLS + static files)
@@ -26,9 +26,15 @@ The interface supports English, French, Italian, Spanish, Simplified Chinese and
 
 ## Mobile app
 
-The customer, driver and admin workflows are delivered in one installable, mobile-first PWA, so users can install uBeer from their phone browser without a native build. On iPhone or iPad, open uBeer in Safari and choose **Share → Add to Home Screen**. On Android, open it in Chrome and choose **Install app** (or **Add to Home screen**). The app menu links to customer orders, the driver console and admin; the home-screen shortcuts open customer orders and the driver app directly.
+The mobile-first React app contains the customer, driver and admin workflows. iPhone and iPad users can install it from Safari with **Share → Add to Home Screen**. Android users can install the native shell from **Download Android app** on the home page; the same web app remains available as a Chrome PWA. The APK keeps the full ordering, payment, account, tracking, driver, admin and support flows in one app window. It asks for Android location permission only when the user requests geolocation and opens the system document picker for driver ID uploads.
 
-The home page's **Download the uBeer mobile app** button opens the platform install prompt or phone-specific instructions. The generated artwork is in `apps/web/public/images/`; the transparent Heineken pack image is the product-card artwork and the other scenes are used on the welcome, driver, waitlist and delivered-order views. The site also includes a 24-hour delivery promotion and a 2,000+ cryptocurrency acceptance banner.
+Build a development APK with the checked-in Gradle wrapper (no system Gradle install):
+
+```sh
+./gradlew -p apps/android assembleDebug
+```
+
+That development artifact is `apps/android/app/build/outputs/apk/debug/app-debug.apk`. The distributable production APK is built with `./gradlew -p apps/android assembleRelease` and signed using the private server key configured in the ignored `apps/android/signing.properties` file. Keep the keystore backed up securely; future APK updates must use the same key. Android 8.0+ is supported. Google Play distribution needs Play Console setup. The generated artwork is in `apps/web/public/images/`; the Heineken pack image is the product-card artwork and the other scenes are used on the welcome, driver, waitlist and delivered-order views. The site also includes a 24-hour delivery promotion and a 2,000+ cryptocurrency acceptance banner.
 
 ## AI support chat
 
@@ -68,7 +74,7 @@ PostgreSQL is expected to run on the host. Redis is the only container in the co
    npm run db:seed
    ```
 
-   Seeding creates `admin@ubeer.local` with a random password and TOTP secret, a clearly marked test region following the Island of Montréal shoreline, the `$30.00` test Heineken six-pack, and one pending driver application. The checked-in boundary is a simplified OpenStreetMap polygon; generated art and client-side maps are never used for delivery eligibility. The seed prints the initial admin credentials once and writes them to `/root/ubeer-admin-credentials.txt` with mode `0600`. Run the seed as root when that exact credentials file is required; the seed is idempotent and does not recreate credentials for an existing admin.
+   Seeding creates `admin@ubeer.local` with a random password and TOTP secret, the Montréal Island delivery region, the `$30.00` test Heineken six-pack, and one pending driver application. The checked-in boundary is a simplified OpenStreetMap polygon; generated art and client-side maps are never used for delivery eligibility. The seed prints the initial admin credentials once and writes them to `/root/ubeer-admin-credentials.txt` with mode `0600`. Run the seed as root when that exact credentials file is required; the seed is idempotent and does not recreate credentials for an existing admin.
 
 3. Run the API and web app in separate terminals:
 
@@ -136,7 +142,7 @@ For TLS issuance, Certbot needs a contact email; enter the operator’s real add
 
 ## Current product notes
 
-- The seeded listing and polygon are test data. The catalog marks the beer as a test listing in both the UI and database.
+- The configured polygon covers Montréal Island. The catalog marks the seeded Heineken listing as a test item in both the UI and database.
 - The ID check at handoff uses a six-digit customer code; the driver enters it to complete delivery.
 - BTCPay refunds are out of scope for the MVP. Admins can record a manual refund note and status.
 - SMTP is not configured by default. Replace the console `MailTransport` in `apps/api/src/email.ts` with an SMTP adapter when credentials are available.

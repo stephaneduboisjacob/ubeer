@@ -198,7 +198,7 @@ app.post("/api/support/chat", { config: { rateLimit: { max: 12, timeWindow: "1 m
 
 PLATFORM FACTS:
 - uBeer has customer ordering, a mobile-first installable PWA, a driver application, and an administrator panel.
-- Customers enter an address; the server validates a street address or full Canadian postal code against active delivery regions. Ambiguous matches and approximate postal-code matches cannot be used to check out. The configured test service area is the Island of Montréal, Quebec. Customers outside active regions can join the waitlist.
+- Customers enter an address; the server validates a street address or full Canadian postal code against active delivery regions. Ambiguous matches and approximate postal-code matches cannot be used to check out. The configured service area is Montréal Island, Quebec. Customers outside active regions can join the waitlist.
 - The customer catalog and fees are region-specific. The current product and active region details below come from the database. Use these values and do not invent availability or prices.
 - The seeded six-pack Heineken listing is marked as a test listing. Tell customers to check the live catalog for current availability and final pricing.
 - The website advertises delivery 24 hours per day. Actual order availability depends on the service region and live ordering options.

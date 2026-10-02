@@ -12,17 +12,20 @@ const prisma = new PrismaClient();
 
 async function main() {
   const geometry = JSON.parse(await readFile(new URL("./data/montreal-island.geojson", import.meta.url), "utf8"));
-  const seededRegion = await prisma.region.findFirst({
-    where: { name: { in: ["Test Region — Montréal Island", "Test Region — Downtown"] } },
+  const seededRegions = await prisma.region.findMany({
+    where: { name: { in: ["Montréal Island", "Test Region — Montréal Island", "Test Region — Downtown"] } },
     orderBy: { createdAt: "asc" },
   });
+  const seededRegion = seededRegions.find((candidate) => candidate.name === "Montréal Island")
+    ?? seededRegions.find((candidate) => candidate.name === "Test Region — Montréal Island")
+    ?? seededRegions[0];
   const region = seededRegion
     ? await prisma.region.update({
       where: { id: seededRegion.id },
-      data: { name: "Test Region — Montréal Island", geometry, languageCode: "fr", active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
+      data: { name: "Montréal Island", geometry, languageCode: "fr", active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
     })
     : await prisma.region.create({
-      data: { name: "Test Region — Montréal Island", geometry, languageCode: "fr", active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
+      data: { name: "Montréal Island", geometry, languageCode: "fr", active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
     });
 
   const existingAdmin = await prisma.user.findUnique({ where: { email: "admin@ubeer.local" } });

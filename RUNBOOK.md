@@ -29,6 +29,10 @@ sudo rsync -a --delete apps/web/dist/ /var/www/ubeer/web/
 sudo systemctl restart ubeer-api
 ```
 
+## Android app release
+
+The production APK is published at `/downloads/ubeer-android.apk`. Build updates with `./gradlew -p apps/android assembleRelease`, increment `versionCode` in `apps/android/app/build.gradle.kts`, and copy the resulting `apps/android/app/build/outputs/apk/release/app-release.apk` to `/var/www/ubeer/web/downloads/ubeer-android.apk`. The signing configuration is in the ignored `apps/android/signing.properties`; the private keystore is `/home/sven/.android/ubeer-release.p12`. Back up the keystore and signing configuration in encrypted storage. Users cannot install an update signed with a different key.
+
 ## BTCPay key rotation
 
 1. Create a replacement Greenfield API key and webhook secret in BTCPay.
