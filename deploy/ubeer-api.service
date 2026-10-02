@@ -1,0 +1,26 @@
+[Unit]
+Description=uBeer Fastify API
+After=network.target postgresql.service docker.service
+Wants=postgresql.service docker.service
+
+[Service]
+Type=simple
+User=ubeer
+Group=ubeer
+WorkingDirectory=/opt/ubeer
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/ubeer/.env
+ExecStart=/usr/bin/node /opt/ubeer/apps/api/dist/server.js
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/ubeer/uploads
+LockPersonality=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

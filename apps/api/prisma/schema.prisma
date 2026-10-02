@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  DRIVER
+  ADMIN
+}
+
+enum OrderStatus {
+  pending_payment
+  paid
+  accepted
+  preparing
+  out_for_delivery
+  delivered
+  cancelled
+  refunded
+  failed
+}
+
+enum DriverApplicationStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+model User {
+  id                    String          @id @default(uuid()) @db.Uuid
+  email                 String          @unique
+  passwordHash          String          @map("password_hash")
+  role                  UserRole        @default(CUSTOMER)
+  name                  String?
+  phone                 String?
+  isBanned              Boolean         @default(false) @map("is_banned")
+  totpSecret            String?         @map("totp_secret")
+  totpEnabled           Boolean         @default(false) @map("totp_enabled")
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+  refreshTokens         RefreshToken[]
+  customerOrders        Order[]         @relation("CustomerOrders")
+  driverOrders          Order[]         @relation("DriverOrders")
+  driverProfile         DriverProfile?
+  auditLogs             AuditLog[]
+  statusEvents          OrderStatusEvent[]
+  driverDeclines        DriverDecline[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  tokenHash  String    @unique @map("token_hash")
+  userId     String    @map("user_id") @db.Uuid
+  expiresAt  DateTime  @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Region {
+  id                 String          @id @default(uuid()) @db.Uuid
+  name               String
+  active             Boolean         @default(false)
+  geometry           Json
+  minimumOrderCents  Int             @default(0) @map("minimum_order_cents")
+  deliveryFeeCents   Int             @default(0) @map("delivery_fee_cents")
+  ageGate            Int             @default(21) @map("age_gate")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+  products           ProductRegion[]
+  orders             Order[]
+  driverProfiles     DriverProfile[]
+  applications       DriverApplication[]
+
+  @@map("regions")
+}
+
+model Product {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String
+  description String          @default("")
+  priceCents  Int             @map("price_cents")
+  currency    String          @default("USD")
+  imagePath   String?         @map("image_path")
+  stock       Int             @default(0)
+  isTest      Boolean         @default(false) @map("is_test")
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  regions     ProductRegion[]
+  orderItems  OrderItem[]
+
+  @@map("products")
+}
+
+model ProductRegion {
+  productId String  @map("product_id") @db.Uuid
+  regionId  String  @map("region_id") @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  region    Region  @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@id([productId, regionId])
+  @@map("product_regions")
+}
+
+model WaitlistEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("waitlist_entries")
+}
+
+model DriverApplication {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  name               String
+  email              String
+  phone              String
+  vehicle            String
+  licenseNumber      String                  @map("license_number")
+  idDocumentPath     String?                 @map("id_document_path")
+  regionId           String                  @map("region_id") @db.Uuid
+  status             DriverApplicationStatus @default(pending)
+  reviewerId         String?                 @map("reviewer_id") @db.Uuid
+  reviewNote         String?                 @map("review_note")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime                @updatedAt @map("updated_at")
+  region             Region                  @relation(fields: [regionId], references: [id])
+
+  @@index([status, createdAt])
+  @@map("driver_applications")
+}
+
+model DriverProfile {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @unique @map("user_id") @db.Uuid
+  regionId         String    @map("region_id") @db.Uuid
+  approved         Boolean   @default(false)
+  online           Boolean   @default(false)
+  latitude         Float?
+  longitude        Float?
+  locationUpdated  DateTime? @map("location_updated_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  region           Region    @relation(fields: [regionId], references: [id])
+  payouts          Payout[]
+
+  @@map("driver_profiles")
+}
+
+model Order {
+  id                 String       @id @default(uuid()) @db.Uuid
+  customerId         String?      @map("customer_id") @db.Uuid
+  customerEmail      String       @map("customer_email")
+  regionId           String       @map("region_id") @db.Uuid
+  driverId           String?      @map("driver_id") @db.Uuid
+  status             OrderStatus  @default(pending_payment)
+  latitude           Float
+  longitude          Float
+  subtotalCents      Int          @map("subtotal_cents")
+  deliveryFeeCents   Int          @map("delivery_fee_cents")
+  totalCents         Int          @map("total_cents")
+  currency           String       @default("USD")
+  ageVerifiedAt      DateTime     @map("age_verified_at")
+  deliveryOtpHash    String       @map("delivery_otp_hash")
+  statusAccessTokenHash String    @map("status_access_token_hash")
+  btcpayInvoiceId    String?      @unique @map("btcpay_invoice_id")
+  btcpayCheckoutLink String?      @map("btcpay_checkout_link")
+  refundNote         String?      @map("refund_note")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+  paidAt             DateTime?    @map("paid_at")
+  deliveredAt        DateTime?    @map("delivered_at")
+  customer           User?        @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: SetNull)
+  driver             User?        @relation("DriverOrders", fields: [driverId], references: [id], onDelete: SetNull)
+  region             Region       @relation(fields: [regionId], references: [id])
+  items              OrderItem[]
+  events             OrderStatusEvent[]
+  driverDeclines     DriverDecline[]
+
+  @@index([status, createdAt])
+  @@index([regionId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String  @id @default(uuid()) @db.Uuid
+  orderId         String  @map("order_id") @db.Uuid
+  productId       String  @map("product_id") @db.Uuid
+  productName     String  @map("product_name")
+  quantity        Int
+  unitPriceCents  Int     @map("unit_price_cents")
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderStatusEvent {
+  id         String      @id @default(uuid()) @db.Uuid
+  orderId    String      @map("order_id") @db.Uuid
+  actorId    String?     @map("actor_id") @db.Uuid
+  fromStatus OrderStatus? @map("from_status")
+  toStatus   OrderStatus @map("to_status")
+  note       String?
+  createdAt  DateTime    @default(now()) @map("created_at")
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  actor      User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+  @@map("order_status_events")
+}
+
+model DriverDecline {
+  orderId   String   @map("order_id") @db.Uuid
+  driverId  String   @map("driver_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driver    User     @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, driverId])
+  @@map("driver_declines")
+}
+
+model BtcpayEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  deliveryId  String   @unique @map("delivery_id")
+  eventType   String   @map("event_type")
+  invoiceId   String?  @map("invoice_id")
+  receivedAt  DateTime @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+
+  @@index([invoiceId, receivedAt])
+  @@map("btcpay_events")
+}
+
+model Payout {
+  id              String        @id @default(uuid()) @db.Uuid
+  driverProfileId String        @map("driver_profile_id") @db.Uuid
+  amountCents     Int           @map("amount_cents")
+  currency        String        @default("USD")
+  paidAt          DateTime?     @map("paid_at")
+  note            String?
+  createdAt       DateTime      @default(now()) @map("created_at")
+  driverProfile   DriverProfile @relation(fields: [driverProfileId], references: [id])
+
+  @@map("payouts")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  action     String
+  targetType String   @map("target_type")
+  targetId   String?  @map("target_id")
+  metadata   Json?
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@map("audit_logs")
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}

@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ubeer.btcpay.exchange;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Keep the app and API private until TLS is installed.
+    location / {
+        return 503;
+        add_header Retry-After 300 always;
+    }
+}

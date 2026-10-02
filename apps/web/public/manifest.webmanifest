@@ -1,0 +1,23 @@
+{
+  "name": "uBeer — Local drinks, delivered",
+  "short_name": "uBeer",
+  "id": "/",
+  "description": "Browse and order from local beverage delivery regions.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f7f7ef",
+  "theme_color": "#244d35",
+  "categories": ["shopping", "food", "lifestyle"],
+  "icons": [
+    { "src": "/icons/ubeer-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/ubeer-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/ubeer-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "My orders", "short_name": "Orders", "url": "/account", "icons": [{ "src": "/icons/ubeer-192.png", "sizes": "192x192" }] },
+    { "name": "Driver app", "short_name": "Drive", "url": "/driver", "icons": [{ "src": "/icons/ubeer-192.png", "sizes": "192x192" }] }
+  ]
+}
