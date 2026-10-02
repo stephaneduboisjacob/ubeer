@@ -19,10 +19,10 @@ async function main() {
   const region = seededRegion
     ? await prisma.region.update({
       where: { id: seededRegion.id },
-      data: { name: "Test Region — Montréal Island", geometry, active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
+      data: { name: "Test Region — Montréal Island", geometry, languageCode: "fr", active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
     })
     : await prisma.region.create({
-      data: { name: "Test Region — Montréal Island", geometry, active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
+      data: { name: "Test Region — Montréal Island", geometry, languageCode: "fr", active: true, ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 },
     });
 
   const existingAdmin = await prisma.user.findUnique({ where: { email: "admin@ubeer.local" } });

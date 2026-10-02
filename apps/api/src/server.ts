@@ -1,4 +1,5 @@
 import { randomBytes, randomInt, timingSafeEqual } from "node:crypto";
+import { isIP } from "node:net";
 import { createReadStream } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -23,6 +24,12 @@ import { loadEnv } from "./env.js";
 loadEnv();
 
 const db = new PrismaClient();
+const geoIpDatabaseUrl = process.env.GEOIP_DATABASE_URL || (() => {
+  const url = new URL(process.env.DATABASE_URL!);
+  url.pathname = "/geoip_database";
+  return url.toString();
+})();
+const geoIpDb = new PrismaClient({ datasources: { db: { url: geoIpDatabaseUrl } } });
 const btcpay = new BtcpayClient();
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? "info" }, trustProxy: true, bodyLimit: 10 * 1024 * 1024 });
 const publicUrl = (process.env.BTCPAY_BASE_URL || process.env.PUBLIC_BASE_URL || "https://ubeer.btcpay.exchange").replace(/\/$/, "");
@@ -73,8 +80,50 @@ app.setErrorHandler((error, request, reply) => {
 
 app.get("/api/health", async () => ({ status: "ok", service: "ubeer-api" }));
 
+const supportedLocales = ["en", "fr", "it", "es", "zh", "ru"] as const;
+type SupportedLocale = typeof supportedLocales[number];
+
+function localeFromAcceptLanguage(header: string | undefined): SupportedLocale {
+  const preferred = (header ?? "").split(",").map((entry) => {
+    const [tag, quality] = entry.trim().split(";q=");
+    return { tag: (tag ?? "").toLowerCase().split("-")[0] ?? "", quality: Number(quality ?? 1) };
+  }).sort((left, right) => right.quality - left.quality);
+  return (preferred.find((entry) => supportedLocales.includes(entry.tag as SupportedLocale))?.tag as SupportedLocale | undefined) ?? "en";
+}
+
+async function lookupClientGeoLocale(ipAddress: string): Promise<{ country: string; subdivision: string } | null> {
+  const ip = ipAddress.startsWith("::ffff:") ? ipAddress.slice(7) : ipAddress;
+  const family = isIP(ip);
+  if (family !== 4 && family !== 6) return null;
+  const result = family === 4
+    ? await geoIpDb.$queryRaw<Array<{ country: string | null; subdivision: string | null }>>`
+        SELECT l.country_iso_code AS country, l.subdivision_1_iso_code AS subdivision
+        FROM public.city_blocks_ipv4 b
+        JOIN public.city_locations l ON l.geoname_id = b.geoname_id
+        WHERE b.network >>= ${ip}::inet
+        LIMIT 1`
+    : await geoIpDb.$queryRaw<Array<{ country: string | null; subdivision: string | null }>>`
+        SELECT l.country_iso_code AS country, l.subdivision_1_iso_code AS subdivision
+        FROM public.city_blocks_ipv6 b
+        JOIN public.city_locations l ON l.geoname_id = b.geoname_id
+        WHERE b.network >>= ${ip}::inet
+        LIMIT 1`;
+  return result[0] ? { country: result[0].country ?? "", subdivision: result[0].subdivision ?? "" } : null;
+}
+
+app.get("/api/locale", async (request) => {
+  let locale = localeFromAcceptLanguage(request.headers["accept-language"]);
+  try {
+    const geography = await lookupClientGeoLocale(request.ip);
+    if (geography?.country === "CA" && geography.subdivision === "QC") locale = "fr";
+  } catch (error) {
+    request.log.warn({ err: error }, "GeoIP lookup unavailable; using browser language");
+  }
+  return { locale };
+});
+
 app.get("/api/regions", async () => {
-  const regions = await db.region.findMany({ where: { active: true }, select: { id: true, name: true, geometry: true, minimumOrderCents: true, deliveryFeeCents: true, ageGate: true } });
+  const regions = await db.region.findMany({ where: { active: true }, select: { id: true, name: true, languageCode: true, geometry: true, minimumOrderCents: true, deliveryFeeCents: true, ageGate: true } });
   return { regions };
 });
 
@@ -84,7 +133,7 @@ app.post("/api/regions/check", async (request, reply) => {
   const coordinate = { latitude: parsed.data.latitude, longitude: parsed.data.longitude };
   const regions = await db.region.findMany({ where: { active: true } });
   const region = regions.find((candidate) => pointInRegion(coordinate, candidate.geometry));
-  return region ? { available: true, region: { id: region.id, name: region.name, minimumOrderCents: region.minimumOrderCents, deliveryFeeCents: region.deliveryFeeCents, ageGate: region.ageGate } } : { available: false, region: null };
+  return region ? { available: true, region: { id: region.id, name: region.name, languageCode: region.languageCode, minimumOrderCents: region.minimumOrderCents, deliveryFeeCents: region.deliveryFeeCents, ageGate: region.ageGate } } : { available: false, region: null };
 });
 
 app.post("/api/geocode", { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } }, async (request, reply) => {
@@ -114,7 +163,7 @@ app.get("/api/catalog", async (request, reply) => {
   const region = await db.region.findFirst({ where: { id: parsed.data.regionId, active: true } });
   if (!region) return reply.code(404).send({ error: "Region not found or inactive" });
   const products = await db.product.findMany({ where: { active: true, stock: { gt: 0 }, regions: { some: { regionId: region.id } } }, orderBy: { name: "asc" } });
-  return { region: { id: region.id, name: region.name, ageGate: region.ageGate, minimumOrderCents: region.minimumOrderCents, deliveryFeeCents: region.deliveryFeeCents }, products };
+  return { region: { id: region.id, name: region.name, languageCode: region.languageCode, ageGate: region.ageGate, minimumOrderCents: region.minimumOrderCents, deliveryFeeCents: region.deliveryFeeCents }, products };
 });
 
 app.post("/api/cart/validate", async (request, reply) => {
@@ -402,7 +451,7 @@ app.get("/api/admin/regions", async (request, reply) => {
 app.post("/api/admin/regions", async (request, reply) => {
   const admin = await requireRole(request, db, [UserRole.ADMIN]);
   if (!admin) return reply.code(403).send({ error: "Administrator access required" });
-  const schema = z.object({ name: z.string().trim().min(2).max(120), active: z.boolean().default(false), geometry: z.record(z.unknown()), minimumOrderCents: z.number().int().min(0), deliveryFeeCents: z.number().int().min(0), ageGate: z.union([z.literal(19), z.literal(21)]) });
+  const schema = z.object({ name: z.string().trim().min(2).max(120), languageCode: z.enum(supportedLocales).default("en"), active: z.boolean().default(false), geometry: z.record(z.unknown()), minimumOrderCents: z.number().int().min(0), deliveryFeeCents: z.number().int().min(0), ageGate: z.union([z.literal(19), z.literal(21)]) });
   const parsed = schema.safeParse(request.body);
   if (!parsed.success) return reply.code(400).send({ error: "Invalid region details" });
   const region = await db.region.create({ data: { ...parsed.data, geometry: parsed.data.geometry as Prisma.InputJsonValue } });
@@ -413,7 +462,7 @@ app.post("/api/admin/regions", async (request, reply) => {
 app.patch("/api/admin/regions/:id", async (request, reply) => {
   const admin = await requireRole(request, db, [UserRole.ADMIN]);
   const params = idParam.safeParse(request.params);
-  const schema = z.object({ name: z.string().trim().min(2).max(120).optional(), active: z.boolean().optional(), geometry: z.record(z.unknown()).optional(), minimumOrderCents: z.number().int().min(0).optional(), deliveryFeeCents: z.number().int().min(0).optional(), ageGate: z.union([z.literal(19), z.literal(21)]).optional() }).strict();
+  const schema = z.object({ name: z.string().trim().min(2).max(120).optional(), languageCode: z.enum(supportedLocales).optional(), active: z.boolean().optional(), geometry: z.record(z.unknown()).optional(), minimumOrderCents: z.number().int().min(0).optional(), deliveryFeeCents: z.number().int().min(0).optional(), ageGate: z.union([z.literal(19), z.literal(21)]).optional() }).strict();
   const parsed = schema.safeParse(request.body);
   if (!admin) return reply.code(403).send({ error: "Administrator access required" });
   if (!params.success || !parsed.success || Object.keys(parsed.data).length === 0) return reply.code(400).send({ error: "Invalid region update" });
@@ -759,6 +808,7 @@ const shutdown = async () => {
   await reconcileQueue?.close();
   if (rateLimitRedis?.status === "ready") await rateLimitRedis.quit();
   await db.$disconnect();
+  await geoIpDb.$disconnect();
   process.exit(0);
 };
 process.once("SIGINT", shutdown);

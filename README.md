@@ -19,9 +19,13 @@ Customer / Driver / Admin PWA (React 19, Vite)
 
 The customer, driver and admin views are one React app, with separate routes and layouts. The API is Fastify; its plugin system keeps request parsing, security headers, cookies, CORS and rate limits explicit. PostgreSQL is the source of truth for orders, refresh tokens and audit history. Redis stores distributed rate-limit state and schedules invoice reconciliation. Email uses a pluggable transport with a structured console transport by default.
 
+The interface supports English, French, Italian, Spanish, Simplified Chinese and Russian. It follows the browser language by default, uses the host's GeoIP database to choose French for visitors in Quebec, and applies each delivery region's configured language after a customer checks an address. Customers can change the language from the header. Montreal regions default to French.
+
 ## Mobile app
 
 The customer, driver and admin workflows are delivered in one installable, mobile-first PWA, so users can install uBeer from their phone browser without a native build. On iPhone or iPad, open uBeer in Safari and choose **Share → Add to Home Screen**. On Android, open it in Chrome and choose **Install app** (or **Add to Home screen**). The app menu links to customer orders, the driver console and admin; the home-screen shortcuts open customer orders and the driver app directly.
+
+The home page's **Download the uBeer mobile app** button opens the platform install prompt or phone-specific instructions. The generated artwork is in `apps/web/public/images/`; the transparent Heineken pack image is the product-card artwork and the other scenes are used on the welcome, driver, waitlist and delivered-order views. The site also includes a 24-hour delivery promotion and a 2,000+ cryptocurrency acceptance banner.
 
 Region geometry is stored as GeoJSON JSONB. The API performs authoritative polygon, multipolygon and circle checks for customer lookups, checkout and driver assignment. Leaflet and OpenStreetMap render the admin region map; Leaflet Draw creates polygon boundaries.
 
@@ -75,6 +79,7 @@ PostgreSQL is expected to run on the host. Redis is the only container in the co
 | `PUBLIC_BASE_URL`, `BTCPAY_BASE_URL` | Public app URL used for invoice return links. |
 | `WEB_ORIGIN` | Exact browser origin allowed by CORS. |
 | `DATABASE_URL` | PostgreSQL connection for the dedicated `ubeer` role. |
+| `GEOIP_DATABASE_URL` | Optional read-only connection for GeoIP; defaults to `geoip_database` using the `DATABASE_URL` credentials. |
 | `REDIS_URL` | Redis connection for rate limits and BullMQ. |
 | `JWT_SECRET` | HMAC signing secret, minimum 32 bytes. |
 | `COOKIE_SECRET` | Reserved cookie secret for future signed-cookie use. |
@@ -112,6 +117,8 @@ The Vitest suite covers polygon/circle geofencing and BTCPay HMAC checks. The Pl
 ## Deployment
 
 Deployment templates are in `deploy/`. The intended installation is `/opt/ubeer`, with the static build copied to `/var/www/ubeer/web` and private uploads under `/var/lib/ubeer/uploads`. The API systemd service runs as the dedicated `ubeer` user, while Nginx terminates TLS and proxies `/api/` to loopback port 4000. PostgreSQL and Redis remain bound to localhost.
+
+The API's GeoIP lookup needs read-only access to the host's `geoip_database`. Apply `deploy/geoip-read-grants.sql` once as a PostgreSQL administrator. Requests without a GeoIP match fall back to the browser's preferred language.
 
 For TLS issuance, Certbot needs a contact email; enter the operator’s real address when prompted before requesting the production certificate. Do not install the HTTPS vhost until the certificate exists, or use the included HTTP challenge vhost first. See [RUNBOOK.md](RUNBOOK.md) for service, key rotation and backup commands.
 

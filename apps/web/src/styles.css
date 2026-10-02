@@ -104,3 +104,29 @@ footer { max-width: 1160px; width: 84%; min-height: 88px; margin: 0 auto; border
 .location-precision-note { color: #9f5937 !important; font-size: 10px !important; }
 .driver-delivery-address { max-width: 380px; color: #34453a !important; font-size: 11px !important; font-weight: 700; line-height: 1.5; }
 @media (max-width: 650px) { .address-results { padding: 13px; }.driver-delivery-address { max-width: min(62vw, 340px); } }
+
+.crypto-acceptance { min-height: 37px; padding: 7px 16px; display: flex; justify-content: center; align-items: center; gap: 9px; color: #244d35; background: #e7efdb; font-size: 11px; text-align: center; }
+.crypto-acceptance strong { font-weight: 800; }
+.crypto-acceptance span { color: #6d7e6d; }
+.language-picker { min-width: 112px; min-height: 37px; padding: 0 8px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #dbe3d2; border-radius: 8px; color: #526158; background: #fff; }
+.language-picker > span { font-size: 12px; }
+.language-picker select { max-width: 150px; padding: 7px 14px 7px 3px; border: 0; outline: 0; color: #405747; background: transparent; font-size: 10px; font-weight: 700; }
+.hours-promo { width: fit-content; max-width: 100%; margin-bottom: 11px; padding: 10px 14px; display: flex; align-items: center; gap: 9px; border-radius: 8px; color: #243a28; background: #d7f36a; font: 800 11px/1.3 Manrope, sans-serif; letter-spacing: .7px; box-shadow: 0 6px 17px #72934a20; }
+.hours-promo span { color: #db8050; font-size: 15px; }
+.install-button-hero { margin-top: 4px; min-height: 45px; padding: 0 16px; font-size: 11px; }
+.hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.product-photo { position: relative; z-index: 1; width: min(94%, 340px); height: 100%; max-height: 265px; object-fit: contain; }
+.test-stamp { z-index: 2; }
+.waitlist-art-image { width: 92px; height: 84px; align-self: center; object-fit: cover; border-radius: 10px; }
+.driver-intro-art { width: min(100%, 560px); max-height: 250px; margin-top: 13px; object-fit: cover; object-position: center 55%; border-radius: 13px; }
+.delivery-confirmed-art { width: 100%; max-height: 210px; margin-bottom: 17px; object-fit: cover; border-radius: 9px; }
+@media (max-width: 900px) { .site-header nav { gap: 12px; }.language-picker { min-width: 100px; }.language-picker select { max-width: 110px; } }
+@media (max-width: 650px) {
+  .crypto-acceptance { min-height: 42px; flex-direction: column; gap: 1px; padding: 6px 12px; font-size: 9px; line-height: 1.3; }
+  .language-picker { justify-content: center; }
+  .language-picker select { max-width: none; font-size: 11px; }
+  .hours-promo { font-size: 10px; }
+  .install-button-hero { width: 100%; margin-top: 5px; }
+  .waitlist-art-image { width: 100%; height: 180px; object-position: center 50%; }
+  .driver-intro-art { max-height: 190px; }
+}

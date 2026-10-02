@@ -71,6 +71,7 @@ model RefreshToken {
 model Region {
   id                 String          @id @default(uuid()) @db.Uuid
   name               String
+  languageCode       String          @default("en") @map("language_code")
   active             Boolean         @default(false)
   geometry           Json
   minimumOrderCents  Int             @default(0) @map("minimum_order_cents")
