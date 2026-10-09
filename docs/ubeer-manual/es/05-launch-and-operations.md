@@ -12,7 +12,7 @@ Después configure y verifique la búsqueda de direcciones del país; una regió
 
 uBeer dirige el pago a BTCPay Server, verifica webhooks firmados y programa una tarea de conciliación. Registre este webhook:
 
-https://ubeer.btcpay.exchange/api/webhooks/btcpay
+https://ubeer.example.com/api/webhooks/btcpay
 
 Suscríbase a InvoiceCreated, InvoiceReceivedPayment, InvoiceProcessing, InvoiceSettled, InvoiceExpired e InvoiceInvalid. Introduzca BTCPAY_STORE_ID, BTCPAY_API_KEY y BTCPAY_WEBHOOK_SECRET en el archivo .env protegido del servidor. No copie sus valores en este documento, chats ni repositorios. El checkout crea facturas en USD. Los métodos visibles dependen de la configuración de BTCPay.
 
@@ -47,3 +47,7 @@ Haga copias periódicas de PostgreSQL con pg_dump y guárdelas fuera del servido
 ## Gestión de incidentes
 
 Si se expone un secreto, rótelo en su origen, actualice la configuración protegida, reinicie la API, verifique la integración y revoque la credencial anterior. Si dejan de llegar pagos, revise API, Redis, errores de firma, facturas BTCPay y conciliación. Si se exponen documentos personales, limite el acceso, preserve los hechos, avise al responsable de privacidad y cumpla las obligaciones locales de notificación. No elimine registros necesarios para investigar legalmente el incidente.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

@@ -43,7 +43,7 @@ async function main() {
       `Authenticator URI: ${authenticator.keyuri(admin.email, "uBeer", totpSecret)}`,
       "Store this file securely and delete it after configuring an authenticator.",
     ].join("\n") + "\n";
-    const credentialsPath = process.env.ADMIN_CREDENTIALS_PATH ?? "/root/ubeer-admin-credentials.txt";
+    const credentialsPath = process.env.ADMIN_CREDENTIALS_PATH ?? "the protected path configured with `ADMIN_CREDENTIALS_PATH`";
     await mkdir(dirname(credentialsPath), { recursive: true, mode: 0o700 });
     await writeFile(credentialsPath, credentialText, { mode: 0o600, flag: "wx" });
     process.stdout.write(`${credentialText}\nCredentials written to ${credentialsPath}\n`);

@@ -1,70 +1,23 @@
-# uBeer Runbook
+# Deployment runbook
+
+This is a generic self-hosting outline. Replace example values with values for a domain and host you control. Deployment files in this repository are templates, not a record of a live host.
 
 ## Services
 
-The production API unit is `ubeer-api.service`; Nginx serves the PWA and proxies `/api/`. Redis runs from the repository compose file and PostgreSQL is host-native.
+The API, PostgreSQL, Redis, static client, and optional local language model should run on private interfaces behind a TLS-terminating reverse proxy. Keep the language-model service and database off the public network.
 
-```sh
-sudo systemctl restart ubeer-api
-sudo systemctl status ubeer-api
-sudo journalctl -u ubeer-api -f
-sudo systemctl status ollama
-ollama list
-sudo journalctl -u ollama -f
-cd /opt/ubeer && sudo docker compose ps
-sudo nginx -t
-sudo systemctl reload nginx
-```
+## Deployment outline
 
-Ollama must remain bound to loopback port `11434`; do not expose it publicly. The support API defaults to `ghunghab/qwen2.5-1.5b:q4km`. If the support widget reports that the assistant is unavailable, confirm Ollama and the model are present and running, then inspect the API and Ollama journals above.
+1. Create a dedicated service account and install the checkout under a directory such as `/opt/ubeer`.
+2. Store `DATABASE_URL`, fresh JWT and cookie secrets, public origin, and provider credentials in a protected environment file outside the repository.
+3. Install dependencies from the lockfile, apply database migrations, and build the workspaces.
+4. Configure PostgreSQL, Redis, BTCPay, mail, and optional Ollama endpoints for the target environment. Use payment-provider sandboxes during development.
+5. Serve the web build through Nginx or another reverse proxy. Configure TLS, secure cookies, upload limits, and private storage for customer and driver documents.
+6. Review delivery-area boundaries, age checks, consent flows, payment webhooks, backups, and incident procedures before accepting real orders.
+7. Before an Android release, replace the example HTTPS host and allowed hosts in `apps/android/app/src/main/java/com/ubeer/app/MainActivity.java` with domains you control. Build with the Gradle wrapper and sign locally. Keep `signing.properties`, keystores, and release APKs outside Git.
 
-For a code update, install from the committed lockfile, build both workspaces, apply migrations, publish the new static bundle and restart the API:
+Do not commit `.env`, local Android properties, signing material, uploads, identity documents, customer records, or production logs. Alcohol delivery is regulated; this software does not establish compliance for any jurisdiction.
 
-```sh
-cd /opt/ubeer
-sudo npm ci
-sudo npm run build
-sudo npm run db:migrate
-sudo rsync -a --delete apps/web/dist/ /var/www/ubeer/web/
-sudo systemctl restart ubeer-api
-```
+## Contact
 
-## Android app release
-
-The production APK is published at `/downloads/ubeer-android.apk`. Build updates with `./gradlew -p apps/android assembleRelease`, increment `versionCode` in `apps/android/app/build.gradle.kts`, and copy the resulting `apps/android/app/build/outputs/apk/release/app-release.apk` to `/var/www/ubeer/web/downloads/ubeer-android.apk`. The signing configuration is in the ignored `apps/android/signing.properties`; the private keystore is `/home/sven/.android/ubeer-release.p12`. Back up the keystore and signing configuration in encrypted storage. Users cannot install an update signed with a different key.
-
-## BTCPay key rotation
-
-1. Create a replacement Greenfield API key and webhook secret in BTCPay.
-2. Update `BTCPAY_API_KEY` and `BTCPAY_WEBHOOK_SECRET` in `/opt/ubeer/.env`; keep the file owned by `root:ubeer` and mode `0640` so only root and the API service group can read it.
-3. Update the BTCPay webhook registration to use the new secret, then restart `ubeer-api`.
-4. Send a BTCPay test webhook and confirm the API returns success. Check `journalctl -u ubeer-api` for signature errors or duplicate deliveries.
-5. Revoke the old API key and secret after the new integration is confirmed.
-
-Never paste secret values into tickets, source files, shell history or logs. The admin settings screen only shows whether credentials exist and a masked store ID.
-
-## PostgreSQL backup and restore
-
-Create a compressed logical backup as the application database role:
-
-```sh
-sudo -u postgres pg_dump --format=custom --no-owner --dbname=ubeer \
-  --file=/var/backups/ubeer-$(date -u +%Y%m%dT%H%M%SZ).dump
-```
-
-Restrict backup access and copy backups off-host. To restore into a prepared database:
-
-```sh
-sudo -u postgres pg_restore --clean --if-exists --no-owner \
-  --dbname=ubeer /var/backups/ubeer-backup.dump
-```
-
-Include `/var/lib/ubeer/uploads` in the backup plan; it contains private driver application documents. Keep the database and uploads backup schedules aligned.
-
-## BTCPay reconciliation
-
-The API schedules reconciliation every five minutes when Redis is available. It checks pending orders older than ten minutes. Inspect recent webhook rows and orders with Prisma Studio only from a trusted local session; never expose it publicly. If Redis was unavailable at API startup, restore Redis and restart the API to register the repeatable job.
-
-## Driver uploads
-
-Documents are limited to 5 MiB and accepted only when their contents match JPEG, PNG or PDF signatures. Files are stored outside the web root with restrictive permissions and downloaded only through the admin-authenticated document route. Confirm `/var/lib/ubeer/uploads` is owned by `ubeer` and mode `0700`.
+Stephane Jacob <jacobstephane@outlook.com>

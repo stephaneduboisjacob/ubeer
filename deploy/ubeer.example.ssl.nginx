@@ -1,7 +1,7 @@
 server {
     listen 80;
     listen [::]:80;
-    server_name ubeer.btcpay.exchange;
+    server_name ubeer.example.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -15,10 +15,10 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
     http2 on;
-    server_name ubeer.btcpay.exchange;
+    server_name ubeer.example.com;
 
-    ssl_certificate     /etc/letsencrypt/live/ubeer.btcpay.exchange/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/ubeer.btcpay.exchange/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/ubeer.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ubeer.example.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
 

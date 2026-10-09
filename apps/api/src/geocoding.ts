@@ -90,7 +90,7 @@ async function fetchNominatim(url: string): Promise<Response> {
     if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
     nextNominatimRequestAt = Date.now() + 1_100;
     return fetch(url, {
-      headers: { "User-Agent": "uBeer/0.1 (https://ubeer.btcpay.exchange; admin@btcpay.exchange)" },
+      headers: { "User-Agent": "uBeer/0.1 (jacobstephane@outlook.com)" },
       signal: AbortSignal.timeout(8_000),
     });
   });

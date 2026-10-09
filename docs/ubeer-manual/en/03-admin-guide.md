@@ -2,9 +2,9 @@
 
 ## Access and account security
 
-Open https://ubeer.btcpay.exchange/admin. Sign in with the administrator email and password provisioned for this installation, then enter the current six-digit code from the enrolled authenticator app. Administrator TOTP is mandatory. Bootstrap credentials are stored separately on the server; do not copy them into this manual, a ticket, or a chat. If the initial authenticator has not been enrolled, use the protected bootstrap instructions. The web app currently has no self-service admin password or TOTP recovery flow; restrict server recovery to trusted operators and rotate any exposed credentials.
+Open https://ubeer.example.com/admin. Sign in with the administrator email and password provisioned for this installation, then enter the current six-digit code from the enrolled authenticator app. Administrator TOTP is mandatory. Bootstrap credentials are stored separately on the server; do not copy them into this manual, a ticket, or a chat. If the initial authenticator has not been enrolled, use the protected bootstrap instructions. The web app currently has no self-service admin password or TOTP recovery flow; restrict server recovery to trusted operators and rotate any exposed credentials.
 
-For this installation, the one-time bootstrap credential file is /root/ubeer-admin-credentials.txt and is readable only by the server administrator. Ask the authorized host operator to provision access securely, enroll the authenticator, and remove the file afterward. Never place the password or TOTP seed in email, a ticket, or this documentation.
+For this installation, the one-time bootstrap credential file is the protected path configured with `ADMIN_CREDENTIALS_PATH` and is readable only by the server administrator. Ask the authorized host operator to provision access securely, enroll the authenticator, and remove the file afterward. Never place the password or TOTP seed in email, a ticket, or this documentation.
 
 Use a unique password, lock devices, and sign out on shared computers. The session uses secure, HTTP-only cookies. Admin mutations create audit records; review the Audit log after sensitive changes.
 
@@ -37,3 +37,7 @@ Users lets admins ban or unban customer accounts. Payouts are manual records: se
 Settings displays the platform-fee percentage and masked BTCPay configuration state. The fee can be changed there. BTCPay store ID, API key, webhook secret, database credentials, and signing keys belong in protected server configuration, never in the browser, source control, or this guide. The admin panel does not reveal secret values.
 
 Check the Dashboard and Audit log daily. Reconcile paid orders, failed invoices, driver availability, manual refunds, and payout records. Use the [Launch and operations guide](05-launch-and-operations.md) for payment setup, backups, incident triage, and market approval gates.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

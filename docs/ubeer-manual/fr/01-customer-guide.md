@@ -2,7 +2,7 @@
 
 ## 1. Ouvrir uBeer
 
-Rendez-vous sur https://ubeer.btcpay.exchange depuis un téléphone ou un ordinateur. Sur iPhone ou iPad, ouvrez la page dans Safari, touchez Partager, puis Sur l’écran d’accueil. Sur Android, ouvrez-la dans Chrome et choisissez Installer l’application ou Ajouter à l’écran d’accueil. La page d’accueil propose aussi l’APK Android. L’application Android est une application WebView signée qui affiche le site mobile uBeer; n’installez les mises à jour qu’à partir du site officiel uBeer.
+Rendez-vous sur https://ubeer.example.com depuis un téléphone ou un ordinateur. Sur iPhone ou iPad, ouvrez la page dans Safari, touchez Partager, puis Sur l’écran d’accueil. Sur Android, ouvrez-la dans Chrome et choisissez Installer l’application ou Ajouter à l’écran d’accueil. La page d’accueil propose aussi l’APK Android. L’application Android est une application WebView signée qui affiche le site mobile uBeer; n’installez les mises à jour qu’à partir du site officiel uBeer.
 
 Choisissez une langue dans l’en-tête. Les visiteurs du Québec voient généralement le français par défaut; une région de livraison peut imposer sa propre langue initiale. Vous pouvez changer la langue manuellement.
 
@@ -41,3 +41,7 @@ Vous pouvez créer un compte ou vous connecter à « Mes commandes » pour consu
 Le clavardage d’assistance uBeer répond aux questions générales dans la langue choisie. Il ne peut ni consulter votre commande, ni la modifier, ni vérifier un paiement. Ne communiquez jamais de mot de passe, code d’authentification, code de remise, secret de paiement ou pièce d’identité dans le clavardage. Pour un problème de paiement ou de livraison, utilisez le canal d’assistance publié et indiquez la référence de commande, jamais un code secret.
 
 La livraison d’alcool est réservée aux adultes admissibles et dépend des lois et règles d’exploitation du lieu réel de livraison. Ne conduisez pas après avoir consommé. Si un paiement semble effectué alors que la commande est encore en attente, conservez le reçu BTCPay et demandez à l’assistance de vérifier la facture; ne payez pas une seconde fois avant cette vérification.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

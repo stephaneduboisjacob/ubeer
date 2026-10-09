@@ -10,7 +10,7 @@ test("customer finds their region, adds the test pack, and gets a BTCPay checkou
   await page.route("**/api/regions/check**", (route) => route.fulfill({ json: { available: true, region: { id: regionId, name: "Montréal Island", ageGate: 19, minimumOrderCents: 0, deliveryFeeCents: 500 } } }));
   await page.route("**/api/catalog**", (route) => route.fulfill({ json: { region: { id: regionId, name: "Montréal Island", ageGate: 19, deliveryFeeCents: 500 }, products: [{ id: productId, name: "6-Pack Heineken Beer", description: "Test listing: six-pack of Heineken beer.", priceCents: 3000, stock: 999, isTest: true }] } }));
   await page.route("**/api/cart/validate", (route) => route.fulfill({ json: { valid: true } }));
-  await page.route("**/api/checkout", (route) => route.fulfill({ status: 201, json: { orderId: "96373de7-c381-4ed3-b999-c70ae04731a7", checkoutLink: "https://payments.btcpay.exchange/i/test-invoice", statusToken: "test-status-token-0123456789-abcdef", deliveryCode: "084216" } }));
+  await page.route("**/api/checkout", (route) => route.fulfill({ status: 201, json: { orderId: "96373de7-c381-4ed3-b999-c70ae04731a7", checkoutLink: "https://payments.example.com/i/test-invoice", statusToken: "test-status-token-0123456789-abcdef", deliveryCode: "084216" } }));
 
   await page.goto("/");
   await page.getByRole("textbox", { name: "Address or postal code" }).first().fill("100 Rue Sainte-Catherine Ouest, Montréal");
@@ -23,7 +23,7 @@ test("customer finds their region, adds the test pack, and gets a BTCPay checkou
   await page.getByRole("checkbox", { name: /I confirm I am at least 19 years old/ }).check();
   await page.getByRole("button", { name: "Continue to secure checkout" }).click();
   await expect(page.getByText("084216")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Pay securely with Bitcoin" })).toHaveAttribute("href", "https://payments.btcpay.exchange/i/test-invoice");
+  await expect(page.getByRole("link", { name: "Pay securely with Bitcoin" })).toHaveAttribute("href", "https://payments.example.com/i/test-invoice");
 });
 
 test("mobile app can be installed and reaches customer, driver, and admin areas", async ({ page }) => {

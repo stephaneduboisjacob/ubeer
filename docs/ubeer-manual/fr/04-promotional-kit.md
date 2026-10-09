@@ -46,3 +46,7 @@ Ces textes sont des brouillons pour la marque et les échanges commerciaux uBeer
 ## Contrôle visuel et publication
 
 Utilisez les visuels actuels comme éléments de marque du prototype, pas comme preuve d’exploitation locale. N’affichez ni mineurs, ni consommation dangereuse, ni conduite après consommation, ni logos de partenaires non autorisés. Ajoutez une mention locale de consommation responsable, le seuil d’âge, le lien d’assistance et les conditions de service à chaque page de campagne. Vérifiez la traduction, les prix, taxes, horaires, droits d’image et disponibilité avant publication. Notez le réviseur, le marché, le texte approuvé et la date de vérification.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

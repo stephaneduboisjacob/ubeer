@@ -78,3 +78,7 @@ This is the image-generation handoff for the customer and driver PWA. The site c
 
 - App icon: keep `apps/web/public/ubeer-icon.svg` and the existing 192 × 192 and 512 × 512 PNG exports unless the mark is being redesigned. If a refresh is desired, create a vector master at 1024 × 1024 (SVG preferred; no raster detail), then export 192 × 192 and 512 × 512 PNGs. Keep the mark inset by 15% for Android’s maskable crop. Do not use generated lettering; the `uBeer` wordmark belongs in app text.
 - Admin maps, region polygons, status marks and small interface icons are rendered from live GeoJSON, Leaflet or vector/CSS. They need no generated picture.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

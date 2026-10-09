@@ -17,3 +17,7 @@ L’ambiente online è un prototipo configurato per l’isola di Montréal, Qué
 L’interfaccia include inglese, francese, italiano, spagnolo, cinese semplificato e russo. La documentazione è disponibile in inglese, francese, spagnolo, italiano e russo. Prima di ogni lancio, fai verificare da madrelingua i testi, l’assistenza, le condizioni e le informative legali del mercato.
 
 **Non usare la regione di prova di Montréal né il prodotto Heineken dimostrativo per consegne commerciali.** Segui la lista di preparazione prima di pubblicare prezzi o affermazioni su consegna, età, legalità o metodi di pagamento.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

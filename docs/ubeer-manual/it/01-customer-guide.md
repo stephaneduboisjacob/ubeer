@@ -2,7 +2,7 @@
 
 ## 1. Apri uBeer
 
-Visita https://ubeer.btcpay.exchange da telefono o computer. Su iPhone o iPad apri la pagina in Safari, tocca Condividi e poi Aggiungi alla schermata Home. Su Android aprila in Chrome e scegli Installa app o Aggiungi alla schermata Home. La pagina iniziale collega anche all’APK Android. L’app Android è un’app WebView firmata che mostra il sito mobile uBeer; scarica gli aggiornamenti solo dal sito ufficiale uBeer.
+Visita https://ubeer.example.com da telefono o computer. Su iPhone o iPad apri la pagina in Safari, tocca Condividi e poi Aggiungi alla schermata Home. Su Android aprila in Chrome e scegli Installa app o Aggiungi alla schermata Home. La pagina iniziale collega anche all’APK Android. L’app Android è un’app WebView firmata che mostra il sito mobile uBeer; scarica gli aggiornamenti solo dal sito ufficiale uBeer.
 
 Scegli una lingua nell’intestazione. Ai visitatori del Québec viene normalmente mostrato prima il francese; una regione può impostare la propria lingua predefinita. Puoi cambiarla manualmente.
 
@@ -41,3 +41,7 @@ Puoi creare un account o accedere a I miei ordini per vedere quelli associati al
 La chat di assistenza uBeer risponde a domande generali nella lingua selezionata. Non può consultare o modificare un ordine né verificare un pagamento. Non inserire in chat password, codici di autenticazione o consegna, segreti di pagamento o documenti d’identità. Per problemi di pagamento o consegna usa il canale di assistenza pubblicato e fornisci il riferimento dell’ordine, mai un codice segreto.
 
 La consegna di alcol è riservata agli adulti idonei ed è soggetta alle leggi e alle regole operative del luogo effettivo di consegna. Non guidare dopo aver bevuto. Se il pagamento sembra completato ma l’ordine è ancora in attesa, conserva la ricevuta BTCPay e chiedi all’assistenza di riconciliare la fattura; non pagare una seconda volta prima di aver verificato la prima.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

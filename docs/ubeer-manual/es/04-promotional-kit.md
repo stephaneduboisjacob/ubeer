@@ -46,3 +46,7 @@ Estos son borradores de mensajes de marca y ventas de uBeer. No prueban que una 
 ## Revisión visual y publicación
 
 Use el arte actual como material de marca de prototipo, no como prueba de una operación local activa. No muestre menores, consumo inseguro, conducción tras beber ni logotipos de socios sin autorización. Añada la nota local de consumo responsable, edad mínima, enlace de soporte y condiciones en cada página de campaña. Revise traducciones, precios, impuestos, horarios, derechos de imagen y disponibilidad. Registre quién revisó el texto, para qué mercado, la versión aprobada y la fecha.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

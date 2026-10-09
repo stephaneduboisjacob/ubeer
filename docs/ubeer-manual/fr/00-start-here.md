@@ -17,3 +17,7 @@ L’environnement en ligne est un prototype configuré pour l’île de Montréa
 L’interface propose l’anglais, le français, l’italien, l’espagnol, le chinois simplifié et le russe. La documentation est disponible en anglais, français, espagnol, italien et russe. Avant chaque lancement, faites vérifier par des locuteurs natifs les textes, l’assistance, les conditions et les avis juridiques propres au marché.
 
 **N’utilisez pas la région de test de Montréal ni le produit Heineken de démonstration pour des livraisons commerciales.** Suivez la liste de préparation avant de publier des prix ou des promesses concernant la livraison, l’âge, la légalité ou les moyens de paiement.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

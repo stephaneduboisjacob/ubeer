@@ -38,10 +38,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class MainActivity extends Activity {
-    private static final String HOME_URL = "https://ubeer.btcpay.exchange/";
+    private static final String HOME_URL = "https://ubeer.example.com/";
     private static final Set<String> APP_HOSTS = new HashSet<>(Arrays.asList(
-        "ubeer.btcpay.exchange",
-        "payments.btcpay.exchange"
+        "ubeer.example.com",
+        "payments.example.com"
     ));
     private static final int FILE_CHOOSER_REQUEST = 7101;
     private static final int LOCATION_PERMISSION_REQUEST = 7102;
@@ -220,7 +220,7 @@ public final class MainActivity extends Activity {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 Uri uri = Uri.parse(origin);
-                if (!"https".equalsIgnoreCase(uri.getScheme()) || !"ubeer.btcpay.exchange".equalsIgnoreCase(uri.getHost())) {
+                if (!"https".equalsIgnoreCase(uri.getScheme()) || !"ubeer.example.com".equalsIgnoreCase(uri.getHost())) {
                     callback.invoke(origin, false, false);
                     return;
                 }

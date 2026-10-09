@@ -29,3 +29,7 @@ L’écran conducteur affiche les gains enregistrés et le pourcentage de frais 
 ## Sécurité et confidentialité
 
 Protégez les pièces d’identité et les renseignements de commande. N’enregistrez pas de documents client, sauf si une procédure légale l’exige. Utilisez les renseignements uniquement pour la livraison attribuée; ne communiquez pas l’adresse, le courriel ou les détails de commande. En cas d’accident, de menace, de litige ou de doute sur l’admissibilité du destinataire, suspendez la remise et contactez l’exploitant. Respectez les règles locales sur l’alcool, la route et le travail.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

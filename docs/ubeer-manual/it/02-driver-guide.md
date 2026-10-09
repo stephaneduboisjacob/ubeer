@@ -29,3 +29,7 @@ La schermata mostra i guadagni registrati e la percentuale di commissione della 
 ## Sicurezza e privacy
 
 Proteggi documenti e dati degli ordini. Non conservare documenti dei clienti salvo obbligo di legge. Usa i dati solo per l’ordine assegnato e non condividere indirizzi, e-mail o dettagli. In caso di incidente, problema di sicurezza, controversia o dubbio sull’idoneità del destinatario, sospendi la consegna e contatta l’operatore. Rispetta sempre le regole locali su alcol, strada e lavoro.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

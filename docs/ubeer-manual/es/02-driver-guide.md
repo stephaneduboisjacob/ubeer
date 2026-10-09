@@ -29,3 +29,7 @@ La pantalla muestra las ganancias registradas y el porcentaje de comisión de la
 ## Seguridad y privacidad
 
 Proteja los documentos y datos de pedidos. No guarde documentos de clientes salvo que lo exija un proceso legal. Use los datos solo para completar el pedido asignado y no comparta direcciones, correos ni detalles. Ante un accidente, riesgo de seguridad, conflicto o duda sobre la elegibilidad del destinatario, detenga la entrega y contacte con el operador. Cumpla siempre las normas locales de alcohol, tráfico y trabajo.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

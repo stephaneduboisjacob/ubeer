@@ -17,3 +17,7 @@ El entorno activo es un prototipo configurado para la isla de Montreal, Quebec. 
 La interfaz incluye inglés, francés, italiano, español, chino simplificado y ruso. Esta documentación está disponible en inglés, francés, español, italiano y ruso. Antes de cada lanzamiento, revise con hablantes nativos los textos, la atención, las condiciones y los avisos legales del mercado.
 
 **No utilice la región de prueba de Montreal ni el producto Heineken de demostración para entregas comerciales.** Siga la lista de preparación antes de publicar precios o afirmaciones sobre entregas, edad, legalidad o métodos de pago.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

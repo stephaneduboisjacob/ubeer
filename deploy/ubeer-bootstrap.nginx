@@ -1,7 +1,7 @@
 server {
     listen 80;
     listen [::]:80;
-    server_name ubeer.btcpay.exchange;
+    server_name ubeer.example.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;

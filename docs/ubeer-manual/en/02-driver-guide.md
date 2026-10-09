@@ -29,3 +29,7 @@ The driver screen shows recorded earnings and a platform-fee percentage. Earning
 ## Safety and privacy
 
 Keep the ID and delivery documents you see private. Do not photograph, download, or retain customer documents unless a lawful process requires it. Use customer information only to complete the assigned delivery. Do not share a customer's address, email, or order details. If you have an accident, security concern, suspected intoxication, or delivery dispute, stop the handoff and contact the operator through the approved channel. Follow local alcohol, road-safety, and employment rules at all times.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

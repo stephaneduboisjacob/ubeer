@@ -46,3 +46,7 @@ Questi testi sono bozze per il marchio e le presentazioni commerciali uBeer. Non
 ## Controllo visivo e pubblicazione
 
 Usa le immagini attuali come materiale di marca del prototipo, non come prova di un’attività locale. Non mostrare minori, consumo pericoloso, guida dopo aver bevuto o loghi di partner non autorizzati. Inserisci nota locale sul consumo responsabile, soglia di età, contatto supporto e condizioni di servizio in ogni pagina della campagna. Verifica traduzioni, prezzi, imposte, orari, diritti delle immagini e disponibilità prima di pubblicare. Registra revisore, mercato, testo approvato e data della verifica.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

@@ -46,3 +46,7 @@ These are copy drafts for the uBeer brand and sales conversations. They are not 
 ## Visual and publishing checklist
 
 Use the current artwork as prototype brand material, not proof of an active local operation. Do not show minors, unsafe consumption, driving after drinking, or unverified partner logos. Add the local responsible-use line, age gate, support link, and service terms to each campaign landing page. Confirm translated copy, prices, taxes, delivery hours, product imagery rights, and platform availability before publication. Maintain a record of the reviewer, market, approved wording, and review date.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

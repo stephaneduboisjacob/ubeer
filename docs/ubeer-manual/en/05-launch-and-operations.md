@@ -12,7 +12,7 @@ Then configure and verify: address geocoding for that country; an accurate serve
 
 uBeer sends checkout to BTCPay Server and uses signed invoice webhooks plus a reconciliation job. Register the webhook at:
 
-https://ubeer.btcpay.exchange/api/webhooks/btcpay
+https://ubeer.example.com/api/webhooks/btcpay
 
 Subscribe to InvoiceCreated, InvoiceReceivedPayment, InvoiceProcessing, InvoiceSettled, InvoiceExpired, and InvoiceInvalid. Put BTCPAY_STORE_ID, BTCPAY_API_KEY, and BTCPAY_WEBHOOK_SECRET in the protected server .env file. Never place values in this document, admin chat, or source control. Checkout currently creates USD invoices. The payment methods visible in hosted checkout depend on the BTCPay store configuration.
 
@@ -47,3 +47,7 @@ Take regular PostgreSQL backups with pg_dump and store them off-host with restri
 ## Incident response
 
 If a secret is exposed, rotate it at the source, update protected server configuration, restart the API, verify the integration, and revoke the old credential. If payment events stop, check the API and Redis health, webhook signature errors, BTCPay invoice state, and reconciliation job. If personal documents are exposed, restrict access, preserve incident details, notify the designated privacy lead, and follow applicable reporting obligations. Do not delete logs or records needed for a lawful incident review.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

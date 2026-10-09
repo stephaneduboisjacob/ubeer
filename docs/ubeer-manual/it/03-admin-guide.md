@@ -2,9 +2,9 @@
 
 ## Accesso e sicurezza
 
-Apri https://ubeer.btcpay.exchange/admin. Accedi con e-mail e password amministrative predisposte per questa installazione, poi inserisci il codice attuale a sei cifre dell’app di autenticazione. Il TOTP è obbligatorio per gli amministratori. Le credenziali iniziali sono conservate separatamente sul server: non copiarle in questo manuale, ticket o chat. Se l’autenticatore non è ancora stato registrato, segui le istruzioni protette di inizializzazione. L’app non offre recupero autonomo di password o TOTP; limita il recupero lato server agli operatori fidati e ruota ogni segreto esposto.
+Apri https://ubeer.example.com/admin. Accedi con e-mail e password amministrative predisposte per questa installazione, poi inserisci il codice attuale a sei cifre dell’app di autenticazione. Il TOTP è obbligatorio per gli amministratori. Le credenziali iniziali sono conservate separatamente sul server: non copiarle in questo manuale, ticket o chat. Se l’autenticatore non è ancora stato registrato, segui le istruzioni protette di inizializzazione. L’app non offre recupero autonomo di password o TOTP; limita il recupero lato server agli operatori fidati e ruota ogni segreto esposto.
 
-Per questa installazione, il file temporaneo delle credenziali iniziali è /root/ubeer-admin-credentials.txt ed è leggibile solo dall’amministratore del server. Chiedi all’operatore autorizzato di fornire l’accesso tramite un canale sicuro, registra l’autenticatore e poi fai eliminare il file. Non inserire password o segreto TOTP in e-mail, ticket o documentazione.
+Per questa installazione, il file temporaneo delle credenziali iniziali è the protected path configured with `ADMIN_CREDENTIALS_PATH` ed è leggibile solo dall’amministratore del server. Chiedi all’operatore autorizzato di fornire l’accesso tramite un canale sicuro, registra l’autenticatore e poi fai eliminare il file. Non inserire password o segreto TOTP in e-mail, ticket o documentazione.
 
 Usa una password unica, proteggi i dispositivi e disconnettiti dai computer condivisi. Le modifiche admin generano record di audit; controlla il registro dopo le modifiche sensibili.
 
@@ -37,3 +37,7 @@ Utenti consente di bloccare o sbloccare i profili cliente. I pagamenti ai corrie
 Impostazioni mostra la percentuale di commissione e lo stato mascherato della configurazione BTCPay. Puoi modificare la percentuale qui. ID negozio, chiave API e segreto webhook BTCPay, credenziali database e chiavi di firma devono restare nella configurazione server protetta, mai nel browser, nel repository o in questa guida. Il pannello non mostra i valori segreti.
 
 Controlla ogni giorno Dashboard e Audit. Riconcilia ordini pagati, fatture non riuscite, disponibilità dei corrieri, note di rimborso e pagamenti. Consulta la [guida al lancio e alle operazioni](05-launch-and-operations.md) per pagamenti, backup, incidenti e approvazione dei mercati.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

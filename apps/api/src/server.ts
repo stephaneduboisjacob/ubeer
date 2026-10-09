@@ -32,7 +32,7 @@ const geoIpDatabaseUrl = process.env.GEOIP_DATABASE_URL || (() => {
 const geoIpDb = new PrismaClient({ datasources: { db: { url: geoIpDatabaseUrl } } });
 const btcpay = new BtcpayClient();
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? "info" }, trustProxy: true, bodyLimit: 10 * 1024 * 1024 });
-const publicUrl = (process.env.BTCPAY_BASE_URL || process.env.PUBLIC_BASE_URL || "https://ubeer.btcpay.exchange").replace(/\/$/, "");
+const publicUrl = (process.env.BTCPAY_BASE_URL || process.env.PUBLIC_BASE_URL || "http://127.0.0.1:5173").replace(/\/$/, "");
 const redisUrl = process.env.REDIS_URL;
 let rateLimitRedis: Redis | undefined;
 if (redisUrl) {
@@ -52,7 +52,7 @@ app.addContentTypeParser("application/json", { parseAs: "string" }, (request, bo
 });
 
 await app.register(cookie);
-await app.register(cors, { origin: process.env.WEB_ORIGIN || "https://ubeer.btcpay.exchange", credentials: true });
+await app.register(cors, { origin: process.env.WEB_ORIGIN || "http://127.0.0.1:5173", credentials: true });
 await app.register(helmet, { contentSecurityPolicy: false });
 await app.register(rateLimit, { max: 300, timeWindow: "5 minutes", redis: rateLimitRedis });
 await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 12 } });
@@ -549,7 +549,7 @@ app.get("/api/admin/settings", async (request, reply) => {
   return {
     platformFeePercent: Number(setting?.value ?? process.env.PLATFORM_FEE_PERCENT ?? 15),
     btcpay: {
-      host: process.env.BTCPAY_HOST ?? "https://payments.btcpay.exchange",
+      host: process.env.BTCPAY_HOST ?? "",
       storeId: process.env.BTCPAY_STORE_ID ? `${process.env.BTCPAY_STORE_ID.slice(0, 4)}••••` : null,
       apiKeyConfigured: Boolean(process.env.BTCPAY_API_KEY),
       webhookSecretConfigured: Boolean(process.env.BTCPAY_WEBHOOK_SECRET),

@@ -17,3 +17,7 @@ The live environment is a prototype configured for Montréal Island, Québec. It
 The interface includes English, French, Italian, Spanish, Simplified Chinese, and Russian. This documentation is provided in English, French, Spanish, Italian, and Russian. Review app text, support workflows, local terms, and legal notices with native speakers and qualified local advisers before each launch.
 
 **Do not use the current test catalog or Montréal boundary for commercial delivery.** Follow the launch checklist before publishing market-specific prices or making delivery, age-verification, legal, or payment-method claims.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

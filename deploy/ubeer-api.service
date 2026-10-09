@@ -9,7 +9,7 @@ User=ubeer
 Group=ubeer
 WorkingDirectory=/opt/ubeer
 Environment=NODE_ENV=production
-EnvironmentFile=/opt/ubeer/.env
+EnvironmentFile=/etc/ubeer/ubeer.env
 ExecStart=/usr/bin/node /opt/ubeer/apps/api/dist/server.js
 Restart=on-failure
 RestartSec=5

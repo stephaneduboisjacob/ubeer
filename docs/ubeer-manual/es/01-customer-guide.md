@@ -2,7 +2,7 @@
 
 ## 1. Abrir uBeer
 
-Visite https://ubeer.btcpay.exchange desde un teléfono u ordenador. En iPhone o iPad, abra la página en Safari, pulse Compartir y después Añadir a pantalla de inicio. En Android, ábrala en Chrome y seleccione Instalar aplicación o Añadir a pantalla de inicio. La portada también enlaza al APK de Android. La aplicación Android es una app WebView firmada que muestra la web móvil de uBeer; descargue actualizaciones únicamente desde el sitio oficial de uBeer.
+Visite https://ubeer.example.com desde un teléfono u ordenador. En iPhone o iPad, abra la página en Safari, pulse Compartir y después Añadir a pantalla de inicio. En Android, ábrala en Chrome y seleccione Instalar aplicación o Añadir a pantalla de inicio. La portada también enlaza al APK de Android. La aplicación Android es una app WebView firmada que muestra la web móvil de uBeer; descargue actualizaciones únicamente desde el sitio oficial de uBeer.
 
 Seleccione un idioma en la cabecera. A los visitantes de Quebec normalmente se les muestra primero el francés; cada región puede definir su idioma inicial. Puede cambiarlo manualmente.
 
@@ -41,3 +41,7 @@ Puede crear una cuenta o iniciar sesión en Mis pedidos para ver los pedidos aso
 El chat de soporte de uBeer responde preguntas generales en el idioma elegido. No puede consultar ni cambiar su pedido ni verificar un pago. No comparta contraseñas, códigos de autenticación o entrega, secretos de pago ni documentos de identidad en el chat. Para un problema de pago o entrega, use el canal de soporte publicado e indique la referencia del pedido, nunca un código secreto.
 
 La entrega de alcohol es solo para adultos que cumplan los requisitos y está sujeta a la legislación y a las normas operativas del lugar de entrega. No conduzca tras beber. Si el pago parece realizado pero el pedido sigue pendiente, guarde el recibo de BTCPay y pida al soporte que compruebe la factura; no pague de nuevo hasta que se revise el primer pago.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

@@ -2,7 +2,7 @@
 
 ## 1. Open uBeer
 
-Visit https://ubeer.btcpay.exchange on a phone or computer. On iPhone or iPad, open the page in Safari, tap Share, then choose Add to Home Screen. On Android, open it in Chrome and choose Install app or Add to Home screen. The home page also links to the Android APK. The Android app is a signed WebView app that presents the uBeer mobile site; keep Android set to allow installation from the source you chose and install updates only from the official uBeer site.
+Visit https://ubeer.example.com on a phone or computer. On iPhone or iPad, open the page in Safari, tap Share, then choose Add to Home Screen. On Android, open it in Chrome and choose Install app or Add to Home screen. The home page also links to the Android APK. The Android app is a signed WebView app that presents the uBeer mobile site; keep Android set to allow installation from the source you chose and install updates only from the official uBeer site.
 
 Choose a language from the header. Quebec visitors are normally shown French first; a delivery region can set its own default language. You can change the language manually.
 
@@ -41,3 +41,7 @@ You may create an account or sign in at My orders to see orders associated with 
 The floating uBeer Support chat can answer general platform questions in the selected language. It cannot inspect your order, change an order, or verify payment. Do not share passwords, authenticator codes, delivery codes, payment secrets, or identity documents in chat. For a payment or delivery problem, contact the operator using the published support channel and provide the order reference, never a secret code.
 
 Alcohol delivery is only for eligible adults and is subject to the laws and operating rules of the actual delivery location. Do not drive after drinking. If you think a payment has been taken but the order still says pending, save the BTCPay receipt and ask support to reconcile the invoice; do not pay a second time until the first invoice is checked.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

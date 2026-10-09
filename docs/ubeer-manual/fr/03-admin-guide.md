@@ -2,9 +2,9 @@
 
 ## Accès et sécurité
 
-Ouvrez https://ubeer.btcpay.exchange/admin. Connectez-vous avec l’adresse et le mot de passe administrateur provisionnés pour cette installation, puis saisissez le code actuel à six chiffres de l’application d’authentification. L’authentification TOTP est obligatoire. Les identifiants initiaux sont conservés séparément sur le serveur : ne les copiez ni dans ce guide, ni dans un ticket, ni dans une conversation. En l’absence d’inscription de l’authentificateur, suivez les instructions de démarrage protégées. L’application ne possède pas de procédure autonome de récupération du mot de passe ou du TOTP; confiez la récupération serveur à un opérateur de confiance et remplacez tout secret exposé.
+Ouvrez https://ubeer.example.com/admin. Connectez-vous avec l’adresse et le mot de passe administrateur provisionnés pour cette installation, puis saisissez le code actuel à six chiffres de l’application d’authentification. L’authentification TOTP est obligatoire. Les identifiants initiaux sont conservés séparément sur le serveur : ne les copiez ni dans ce guide, ni dans un ticket, ni dans une conversation. En l’absence d’inscription de l’authentificateur, suivez les instructions de démarrage protégées. L’application ne possède pas de procédure autonome de récupération du mot de passe ou du TOTP; confiez la récupération serveur à un opérateur de confiance et remplacez tout secret exposé.
 
-Pour cette installation, le fichier initial à usage unique est /root/ubeer-admin-credentials.txt; seul l’administrateur du serveur peut le lire. Demandez à l’opérateur autorisé de vous transmettre l’accès de façon sécurisée, inscrivez l’authentificateur, puis faites supprimer le fichier. Ne placez jamais le mot de passe ou la clé TOTP dans un courriel, un ticket ou cette documentation.
+Pour cette installation, le fichier initial à usage unique est the protected path configured with `ADMIN_CREDENTIALS_PATH`; seul l’administrateur du serveur peut le lire. Demandez à l’opérateur autorisé de vous transmettre l’accès de façon sécurisée, inscrivez l’authentificateur, puis faites supprimer le fichier. Ne placez jamais le mot de passe ou la clé TOTP dans un courriel, un ticket ou cette documentation.
 
 Utilisez un mot de passe unique, verrouillez vos appareils et déconnectez-vous des ordinateurs partagés. Les modifications admin créent des entrées d’audit; vérifiez le journal après les changements sensibles.
 
@@ -37,3 +37,7 @@ La section Utilisateurs permet de bloquer ou débloquer un compte client. Les ve
 Paramètres affiche le pourcentage de frais de plateforme et l’état masqué de la configuration BTCPay. Le pourcentage peut être modifié ici. L’identifiant de magasin BTCPay, la clé API, le secret webhook, les identifiants de base de données et les clés de signature doivent rester dans la configuration serveur protégée, jamais dans le navigateur, le dépôt ou ce guide. L’interface admin ne révèle pas leurs valeurs.
 
 Consultez quotidiennement le tableau de bord et le journal d’audit. Rapprochez les commandes payées, les factures échouées, les livreurs, les remboursements manuels et les versements. Consultez le [guide de lancement et d’exploitation](05-launch-and-operations.md) pour les paiements, les sauvegardes, les incidents et l’approbation des marchés.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>

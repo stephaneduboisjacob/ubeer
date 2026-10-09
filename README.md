@@ -1,148 +1,59 @@
 # uBeer
 
-uBeer is a region-gated alcohol delivery marketplace. Customers check a delivery area, browse the local catalog and pay through BTCPay. Drivers apply for approval and manage assigned deliveries. Administrators manage coverage, products, drivers, orders and payouts.
+A region-aware alcohol ordering and delivery marketplace prototype with customer, driver, and admin experiences in a web app and Android shell.
 
-## Architecture
+## What is included
 
-```text
-Customer / Driver / Admin PWA + Android APK (React 19, Vite, native shell)
-                     │ HTTPS
-                     ▼
-           Nginx (TLS + static files)
-              │ /api proxy
-              ▼
-        Fastify API (Node 24)
-          ├── PostgreSQL 18 (Prisma)
-          ├── Redis 7 (rate limits + BullMQ reconciliation)
-          ├── Ollama (local AI support)
-          └── BTCPay Greenfield API + signed webhooks
-```
+- Delivery-area checks backed by server-side geographic boundaries.
+- Catalog, cart, checkout, order tracking, and driver workflows.
+- Admin tools for delivery regions, products, drivers, orders, and payouts.
+- BTCPay payment integration, signed webhook handling, and local AI support-chat integration.
+- English, French, Italian, Spanish, Simplified Chinese, and Russian interface text.
 
-The customer, driver and admin views are one React app, with separate routes and layouts. The API is Fastify; its plugin system keeps request parsing, security headers, cookies, CORS and rate limits explicit. PostgreSQL is the source of truth for orders, refresh tokens and audit history. Redis stores distributed rate-limit state and schedules invoice reconciliation. Email uses a pluggable transport with a structured console transport by default.
+External services need operator-owned credentials. The repository includes fictional development data and no production credentials.
 
-The support chat is a global React widget on every route. Its messages go to the Fastify API, which builds a platform prompt and current region/catalog snapshot, then calls the local Ollama service; the browser never connects to Ollama directly.
+## Run locally
 
-The interface supports English, French, Italian, Spanish, Simplified Chinese and Russian. It follows the browser language by default, uses the host's GeoIP database to choose French for visitors in Quebec, and applies each delivery region's configured language after a customer checks an address. Customers can change the language from the header. Montreal regions default to French.
-
-## Mobile app
-
-The mobile-first React app contains the customer, driver and admin workflows. iPhone and iPad users can install it from Safari with **Share → Add to Home Screen**. Android users can install the native shell from **Download Android app** on the home page; the same web app remains available as a Chrome PWA. The APK keeps the full ordering, payment, account, tracking, driver, admin and support flows in one app window. It asks for Android location permission only when the user requests geolocation and opens the system document picker for driver ID uploads.
-
-Build a development APK with the checked-in Gradle wrapper (no system Gradle install):
+Requirements: Node.js 24, npm 11, PostgreSQL, and Docker Compose. PostgreSQL is configured through `.env`; the Compose file provides Redis.
 
 ```sh
-./gradlew -p apps/android assembleDebug
-```
-
-That development artifact is `apps/android/app/build/outputs/apk/debug/app-debug.apk`. The distributable production APK is built with `./gradlew -p apps/android assembleRelease` and signed using the private server key configured in the ignored `apps/android/signing.properties` file. Keep the keystore backed up securely; future APK updates must use the same key. Android 8.0+ is supported. Google Play distribution needs Play Console setup. The generated artwork is in `apps/web/public/images/`; the Heineken pack image is the product-card artwork and the other scenes are used on the welcome, driver, waitlist and delivered-order views. The site also includes a 24-hour delivery promotion and a 2,000+ cryptocurrency acceptance banner.
-
-## AI support chat
-
-The floating uBeer Support chat appears throughout the customer, driver and admin pages. It uses the locally running Ollama model `ghunghab/qwen2.5-1.5b:q4km` through `POST /api/support/chat`, answers in the selected app language, and receives current active-region and in-stock catalog facts from PostgreSQL. It is rate-limited to 12 messages per IP per minute. The prompt covers address validation, delivery coverage, product pricing, crypto checkout, order tracking, driver onboarding, app installation, and account-safety boundaries. It does not access customer orders or take actions on behalf of the user.
-
-The API connects only to a loopback Ollama URL. Set `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, or `OLLAMA_NUM_THREAD` in `.env` to override their defaults; this server uses eight inference threads and limits each answer to 96 generated tokens. Chat messages are sent to this local model service and are not written to the uBeer database. Users are told not to share passwords, verification or delivery codes, payment details, or identity documents in the chat.
-
-Region geometry is stored as GeoJSON JSONB. The API performs authoritative polygon, multipolygon and circle checks for customer lookups, checkout and driver assignment. Leaflet and OpenStreetMap render the admin region map; Leaflet Draw creates polygon boundaries.
-
-Customer address lookup posts the typed query to Nominatim without putting the address in a URL or access log. The API returns only verified street-address or full Canadian postal-code matches; ambiguous matches are shown for the customer to select. The selected point is checked against active delivery polygons on the server. Postal-code checks are marked approximate and cannot be checked out until an exact street address is selected. Cart and checkout requests repeat the server-side boundary check, and checkout saves the delivery address and coordinates for customer tracking and driver navigation.
-
-## Requirements
-
-- Node.js 24 and npm 11
-- PostgreSQL 18
-- Docker Engine and Docker Compose (Redis 7)
-
-PostgreSQL is expected to run on the host. Redis is the only container in the compose file.
-
-## Local setup
-
-1. Create the ignored environment file and fill in application secrets:
-
-   ```sh
-   cp .env.example .env
-   ```
-
-   Set a PostgreSQL URL for a dedicated `ubeer` role and database, plus random values for `JWT_SECRET` and `COOKIE_SECRET`. Keep `.env` private. The BTCPay credentials may remain empty while developing other features; checkout and webhook handling return a clear configuration error until they are set.
-
-2. Install dependencies, start Redis, apply the schema and seed data:
-
-   ```sh
-   npm ci
-   docker compose up -d redis
-   npm run db:generate
-   npm run db:migrate
-   npm run db:seed
-   ```
-
-   Seeding creates `admin@ubeer.local` with a random password and TOTP secret, the Montréal Island delivery region, the `$30.00` test Heineken six-pack, and one pending driver application. The checked-in boundary is a simplified OpenStreetMap polygon; generated art and client-side maps are never used for delivery eligibility. The seed prints the initial admin credentials once and writes them to `/root/ubeer-admin-credentials.txt` with mode `0600`. Run the seed as root when that exact credentials file is required; the seed is idempotent and does not recreate credentials for an existing admin.
-
-3. Run the API and web app in separate terminals:
-
-   ```sh
-   npm run dev:api
-   npm run dev:web
-   ```
-
-   The web app is at `http://127.0.0.1:5173`; Vite proxies `/api` to `127.0.0.1:4000`. The API binds to loopback by default.
-
-## Environment variables
-
-| Variable | Purpose |
-| --- | --- |
-| `NODE_ENV` | Runtime mode; production enables `Secure` cookies. |
-| `PORT`, `HOST` | API bind address; default is `127.0.0.1:4000`. |
-| `PUBLIC_BASE_URL`, `BTCPAY_BASE_URL` | Public app URL used for invoice return links. |
-| `WEB_ORIGIN` | Exact browser origin allowed by CORS. |
-| `DATABASE_URL` | PostgreSQL connection for the dedicated `ubeer` role. |
-| `GEOIP_DATABASE_URL` | Optional read-only connection for GeoIP; defaults to `geoip_database` using the `DATABASE_URL` credentials. |
-| `REDIS_URL` | Redis connection for rate limits and BullMQ. |
-| `JWT_SECRET` | HMAC signing secret, minimum 32 bytes. |
-| `COOKIE_SECRET` | Reserved cookie secret for future signed-cookie use. |
-| `UPLOAD_DIR` | Private driver ID storage; default `/var/lib/ubeer/uploads`. |
-| `PLATFORM_FEE_PERCENT` | Default driver platform fee; admin can update it. |
-| `BTCPAY_HOST` | BTCPay server URL. |
-| `BTCPAY_STORE_ID` | BTCPay store identifier. |
-| `BTCPAY_API_KEY` | Greenfield API key with invoice read/create access. |
-| `BTCPAY_WEBHOOK_SECRET` | Secret used to verify webhook HMAC signatures. |
-| `OLLAMA_BASE_URL` | Loopback address for local Ollama; defaults to `http://127.0.0.1:11434`. |
-| `OLLAMA_MODEL` | Local Ollama model; defaults to `ghunghab/qwen2.5-1.5b:q4km`. |
-| `OLLAMA_NUM_THREAD` | CPU threads used per chat request; defaults to `8` and is capped at `12`. |
-| `SMTP_URL` | Reserved for the SMTP mail transport adapter. |
-
-## BTCPay Setup
-
-Configure a webhook in BTCPay after the public endpoint is deployed:
-
-- **Webhook URL:** `https://ubeer.btcpay.exchange/api/webhooks/btcpay`
-- **Events:** `InvoiceCreated`, `InvoiceReceivedPayment`, `InvoiceProcessing`, `InvoiceSettled`, `InvoiceExpired`, `InvoiceInvalid`
-- Put the values in the ignored project `.env` file on the server: `BTCPAY_STORE_ID`, `BTCPAY_API_KEY`, and `BTCPAY_WEBHOOK_SECRET`.
-
-The API creates invoices in USD and records the invoice ID and hosted checkout link on the order. It redirects back to the order status view after payment. Webhooks require a valid HMAC-SHA256 signature from `BTCPay-Sig` (BTCPay's documented header) or `BTCPAY-WEBHOOK-SIG`; delivery IDs are unique in the database, so retries are idempotent. A BullMQ scheduler checks pending invoices older than ten minutes every five minutes. Credential values are supplied only through the server environment.
-
-## Build and verification
-
-```sh
+cp .env.example .env
 npm ci
-npm run build
-npm run typecheck
-npm test
-npx playwright install chromium   # once, for the browser smoke test
-npm run test:e2e
+docker compose up -d redis
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 ```
 
-The Vitest suite covers polygon/circle geofencing and BTCPay HMAC checks. The Playwright smoke test stubs the API and confirms the customer path reaches a BTCPay checkout URL without making a real invoice or payment.
+Run the API and web app in separate terminals:
 
-## Deployment
+```sh
+npm run dev:api
+npm run dev:web
+```
 
-Deployment templates are in `deploy/`. The intended installation is `/opt/ubeer`, with the static build copied to `/var/www/ubeer/web` and private uploads under `/var/lib/ubeer/uploads`. The API systemd service runs as the dedicated `ubeer` user, while Nginx terminates TLS and proxies `/api/` to loopback port 4000. PostgreSQL and Redis remain bound to localhost.
+The API and Vite development server use local addresses by default. Configure provider credentials only when you need to test the related integration. Never commit `.env`, Android signing material, uploads, or production customer data.
 
-The API's GeoIP lookup needs read-only access to the host's `geoip_database`. Apply `deploy/geoip-read-grants.sql` once as a PostgreSQL administrator. Requests without a GeoIP match fall back to the browser's preferred language.
+Before an Android release, configure the example HTTPS URL and allowed hosts in `apps/android/app/src/main/java/com/ubeer/app/MainActivity.java`. See [RUNBOOK.md](RUNBOOK.md).
 
-For TLS issuance, Certbot needs a contact email; enter the operator’s real address when prompted before requesting the production certificate. Do not install the HTTPS vhost until the certificate exists, or use the included HTTP challenge vhost first. See [RUNBOOK.md](RUNBOOK.md) for service, key rotation and backup commands.
+Build a development Android package from the project root with:
 
-## Current product notes
+```sh
+cd apps/android && ./gradlew assembleDebug
+```
 
-- The configured polygon covers Montréal Island. The catalog marks the seeded Heineken listing as a test item in both the UI and database.
-- The ID check at handoff uses a six-digit customer code; the driver enters it to complete delivery.
-- BTCPay refunds are out of scope for the MVP. Admins can record a manual refund note and status.
-- SMTP is not configured by default. Replace the console `MailTransport` in `apps/api/src/email.ts` with an SMTP adapter when credentials are available.
+## Important deployment note
+
+Alcohol delivery is regulated. This prototype does not establish licensing, age verification, tax, privacy, or delivery compliance for any jurisdiction. Do not use it to accept real orders without the required legal and operational controls.
+
+See [RUNBOOK.md](RUNBOOK.md) and the [multilingual operator manuals](docs/ubeer-manual/README.md) for more detail.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance and [SECURITY.md](SECURITY.md) for vulnerability reporting.
+
+## License
+
+No license has been selected yet. Public visibility does not grant permission to reuse the code.
+
+## Contact
+
+Stephane Jacob <jacobstephane@outlook.com>

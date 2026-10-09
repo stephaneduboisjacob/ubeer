@@ -2,9 +2,9 @@
 
 ## Acceso y seguridad de la cuenta
 
-Abra https://ubeer.btcpay.exchange/admin. Inicie sesión con el correo y la contraseña de administrador provisionados para esta instalación e introduzca el código actual de seis dígitos de la aplicación autenticadora. TOTP es obligatorio para administradores. Las credenciales iniciales se guardan por separado en el servidor: no las copie en este manual, tickets ni chats. Si todavía no se ha inscrito el autenticador, siga las instrucciones protegidas de inicialización. La aplicación no dispone de recuperación autónoma de contraseña o TOTP; limite la recuperación en el servidor a operadores de confianza y rote los secretos expuestos.
+Abra https://ubeer.example.com/admin. Inicie sesión con el correo y la contraseña de administrador provisionados para esta instalación e introduzca el código actual de seis dígitos de la aplicación autenticadora. TOTP es obligatorio para administradores. Las credenciales iniciales se guardan por separado en el servidor: no las copie en este manual, tickets ni chats. Si todavía no se ha inscrito el autenticador, siga las instrucciones protegidas de inicialización. La aplicación no dispone de recuperación autónoma de contraseña o TOTP; limite la recuperación en el servidor a operadores de confianza y rote los secretos expuestos.
 
-Para esta instalación, el archivo temporal de credenciales iniciales es /root/ubeer-admin-credentials.txt y solo lo puede leer el administrador del servidor. Pida al operador autorizado que le facilite el acceso de forma segura, configure el autenticador y elimine después el archivo. No incluya la contraseña ni el secreto TOTP en correos, tickets o esta documentación.
+Para esta instalación, el archivo temporal de credenciales iniciales es the protected path configured with `ADMIN_CREDENTIALS_PATH` y solo lo puede leer el administrador del servidor. Pida al operador autorizado que le facilite el acceso de forma segura, configure el autenticador y elimine después el archivo. No incluya la contraseña ni el secreto TOTP en correos, tickets o esta documentación.
 
 Use una contraseña exclusiva, proteja los dispositivos y cierre la sesión en equipos compartidos. Los cambios de administración generan registros de auditoría; revise el registro tras cambios importantes.
 
@@ -37,3 +37,7 @@ Usuarios permite bloquear o desbloquear cuentas de clientes. Los pagos a reparti
 Ajustes muestra el porcentaje de comisión y el estado enmascarado de BTCPay. El porcentaje puede cambiarse allí. El ID de tienda, clave API y secreto webhook de BTCPay, credenciales de base de datos y claves de firma deben permanecer en la configuración protegida del servidor, nunca en el navegador, el repositorio o este manual. El panel no revela los valores secretos.
 
 Revise a diario el panel y la auditoría. Concilie pedidos pagados, facturas fallidas, disponibilidad de repartidores, reembolsos manuales y pagos. Consulte la [guía de lanzamiento y operaciones](05-launch-and-operations.md) para la configuración de pagos, copias de seguridad, incidentes y aprobación de mercados.
+
+---
+
+Contact: Stephane Jacob <jacobstephane@outlook.com>
