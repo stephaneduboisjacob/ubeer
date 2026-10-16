@@ -1,4 +1,8 @@
-# uBeer
+# uBeer — Regional Alcohol Marketplace Prototype
+
+<p align="center">
+  <img src="assets/brand/README-logo.svg" alt="uBeer — a regional ordering and delivery marketplace" width="760">
+</p>
 
 A region-aware alcohol ordering and delivery marketplace prototype with customer, driver, and admin experiences in a web app and Android shell.
 
@@ -52,7 +56,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidance and [SECURITY.md
 
 ## License
 
-No license has been selected yet. Public visibility does not grant permission to reuse the code.
+This source-available project is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Noncommercial use is permitted under its terms; commercial use requires separate written permission.
 
 ## Contact
 
